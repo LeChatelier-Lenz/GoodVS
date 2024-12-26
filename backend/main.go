@@ -1,6 +1,6 @@
 package main
 
-import "price-compare/cmd"
+import "goodvs/cmd"
 
 func main() {
 	cmd.Execute()

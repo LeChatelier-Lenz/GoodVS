@@ -3,8 +3,7 @@ package cmd
 import (
 	"fmt"
 	"github.com/spf13/cobra"
-	"price-compare/internal/controller"
-	"price-compare/internal/dao"
+	"goodvs/internal/controller"
 )
 
 // rootCmd represents the base command when called without any subcommands
@@ -15,9 +14,12 @@ var rootCmd = &cobra.Command{
 
 	RunE: func(cmd *cobra.Command, args []string) error {
 		// init db
-		dao.InitDB()
-		// start server
+		//dao.InitDB()
+		//// start server
+		fmt.Println("Hello, GoodVS!")
 		return controller.StartServer()
+
+		//return nil
 	},
 }
 

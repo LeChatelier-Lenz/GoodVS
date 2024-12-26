@@ -5,37 +5,39 @@ package server
 
 import (
 	"fmt"
+	//"fmt"
 	"github.com/gin-gonic/gin"
-	"github.com/oapi-codegen/runtime"
+	//"github.com/oapi-codegen/runtime"
 	"net/http"
 )
 
 // ServerInterface represents all server handlers.
 type ServerInterface interface {
+	Ping(c *gin.Context)
 	// band
 	// (GET /material/band)
-	GetMaterialBand(c *gin.Context, params GetMaterialBandParams)
-	// cif
-	// (GET /material/cif)
-	GetMaterialCif(c *gin.Context, params GetMaterialCifParams)
-	// details
-	// (GET /material/detail)
-	GetMaterialDetail(c *gin.Context, params GetMaterialDetailParams)
-	// nacdos
-	// (GET /material/nacdos)
-	GetMaterialNacdos(c *gin.Context, params GetMaterialNacdosParams)
-	// poscar
-	// (GET /material/poscar)
-	GetMaterialPoscar(c *gin.Context, params GetMaterialPoscarParams)
-	// brief_search
-	// (POST /search/brief)
-	PostSearchBrief(c *gin.Context)
-	// search
-	// (POST /search/result)
-	PostSearchResult(c *gin.Context)
-	// upload
-	// (POST /upload)
-	PostUpload(c *gin.Context)
+	//GetMaterialBand(c *gin.Context, params GetMaterialBandParams)
+	//// cif
+	//// (GET /material/cif)
+	//GetMaterialCif(c *gin.Context, params GetMaterialCifParams)
+	//// details
+	//// (GET /material/detail)
+	//GetMaterialDetail(c *gin.Context, params GetMaterialDetailParams)
+	//// nacdos
+	//// (GET /material/nacdos)
+	//GetMaterialNacdos(c *gin.Context, params GetMaterialNacdosParams)
+	//// poscar
+	//// (GET /material/poscar)
+	//GetMaterialPoscar(c *gin.Context, params GetMaterialPoscarParams)
+	//// brief_search
+	//// (POST /search/brief)
+	//PostSearchBrief(c *gin.Context)
+	//// search
+	//// (POST /search/result)
+	//PostSearchResult(c *gin.Context)
+	//// upload
+	//// (POST /upload)
+	//PostUpload(c *gin.Context)
 }
 
 // ServerInterfaceWrapper converts contexts to parameters.
@@ -47,268 +49,274 @@ type ServerInterfaceWrapper struct {
 
 type MiddlewareFunc func(c *gin.Context)
 
-// GetMaterialBand operation middleware
-func (siw *ServerInterfaceWrapper) GetMaterialBand(c *gin.Context) {
-
-	var err error
-
-	// Parameter object where we will unmarshal all parameters from the context
-	var params GetMaterialBandParams
-
-	// ------------- Required query parameter "id" -------------
-
-	if paramValue := c.Query("id"); paramValue != "" {
-
-	} else {
-		siw.ErrorHandler(c, fmt.Errorf("Query argument id is required, but not found"), http.StatusBadRequest)
-		return
-	}
-
-	err = runtime.BindQueryParameter("form", true, true, "id", c.Request.URL.Query(), &params.Id)
-	if err != nil {
-		siw.ErrorHandler(c, fmt.Errorf("Invalid format for parameter id: %w", err), http.StatusBadRequest)
-		return
-	}
-
-	// ------------- Required query parameter "SOC" -------------
-
-	if paramValue := c.Query("SOC"); paramValue != "" {
-
-	} else {
-		siw.ErrorHandler(c, fmt.Errorf("Query argument SOC is required, but not found"), http.StatusBadRequest)
-		return
-	}
-
-	err = runtime.BindQueryParameter("form", true, true, "SOC", c.Request.URL.Query(), &params.SOC)
-	if err != nil {
-		siw.ErrorHandler(c, fmt.Errorf("Invalid format for parameter SOC: %w", err), http.StatusBadRequest)
-		return
-	}
-
-	for _, middleware := range siw.HandlerMiddlewares {
-		middleware(c)
-		if c.IsAborted() {
-			return
-		}
-	}
-
-	siw.Handler.GetMaterialBand(c, params)
-}
-
-// GetMaterialCif operation middleware
-func (siw *ServerInterfaceWrapper) GetMaterialCif(c *gin.Context) {
-
-	var err error
-
-	// Parameter object where we will unmarshal all parameters from the context
-	var params GetMaterialCifParams
-
-	// ------------- Required query parameter "id" -------------
-
-	if paramValue := c.Query("id"); paramValue != "" {
-
-	} else {
-		siw.ErrorHandler(c, fmt.Errorf("Query argument id is required, but not found"), http.StatusBadRequest)
-		return
-	}
-
-	err = runtime.BindQueryParameter("form", true, true, "id", c.Request.URL.Query(), &params.Id)
-	if err != nil {
-		siw.ErrorHandler(c, fmt.Errorf("Invalid format for parameter id: %w", err), http.StatusBadRequest)
-		return
-	}
-
-	// ------------- Required query parameter "SOC" -------------
-
-	if paramValue := c.Query("SOC"); paramValue != "" {
-
-	} else {
-		siw.ErrorHandler(c, fmt.Errorf("Query argument SOC is required, but not found"), http.StatusBadRequest)
-		return
-	}
-
-	err = runtime.BindQueryParameter("form", true, true, "SOC", c.Request.URL.Query(), &params.SOC)
-	if err != nil {
-		siw.ErrorHandler(c, fmt.Errorf("Invalid format for parameter SOC: %w", err), http.StatusBadRequest)
-		return
-	}
-
-	for _, middleware := range siw.HandlerMiddlewares {
-		middleware(c)
-		if c.IsAborted() {
-			return
-		}
-	}
-
-	siw.Handler.GetMaterialCif(c, params)
-}
-
-// GetMaterialDetail operation middleware
-func (siw *ServerInterfaceWrapper) GetMaterialDetail(c *gin.Context) {
-
-	var err error
-
-	// Parameter object where we will unmarshal all parameters from the context
-	var params GetMaterialDetailParams
-
-	// ------------- Required query parameter "id" -------------
-
-	if paramValue := c.Query("id"); paramValue != "" {
-
-	} else {
-		siw.ErrorHandler(c, fmt.Errorf("Query argument id is required, but not found"), http.StatusBadRequest)
-		return
-	}
-
-	err = runtime.BindQueryParameter("form", true, true, "id", c.Request.URL.Query(), &params.Id)
-	if err != nil {
-		siw.ErrorHandler(c, fmt.Errorf("Invalid format for parameter id: %w", err), http.StatusBadRequest)
-		return
-	}
-
-	for _, middleware := range siw.HandlerMiddlewares {
-		middleware(c)
-		if c.IsAborted() {
-			return
-		}
-	}
-
-	siw.Handler.GetMaterialDetail(c, params)
-}
-
-// GetMaterialNacdos operation middleware
-func (siw *ServerInterfaceWrapper) GetMaterialNacdos(c *gin.Context) {
-
-	var err error
-
-	// Parameter object where we will unmarshal all parameters from the context
-	var params GetMaterialNacdosParams
-
-	// ------------- Required query parameter "id" -------------
-
-	if paramValue := c.Query("id"); paramValue != "" {
-
-	} else {
-		siw.ErrorHandler(c, fmt.Errorf("Query argument id is required, but not found"), http.StatusBadRequest)
-		return
-	}
-
-	err = runtime.BindQueryParameter("form", true, true, "id", c.Request.URL.Query(), &params.Id)
-	if err != nil {
-		siw.ErrorHandler(c, fmt.Errorf("Invalid format for parameter id: %w", err), http.StatusBadRequest)
-		return
-	}
-
-	// ------------- Required query parameter "SOC" -------------
-
-	if paramValue := c.Query("SOC"); paramValue != "" {
-
-	} else {
-		siw.ErrorHandler(c, fmt.Errorf("Query argument SOC is required, but not found"), http.StatusBadRequest)
-		return
-	}
-
-	err = runtime.BindQueryParameter("form", true, true, "SOC", c.Request.URL.Query(), &params.SOC)
-	if err != nil {
-		siw.ErrorHandler(c, fmt.Errorf("Invalid format for parameter SOC: %w", err), http.StatusBadRequest)
-		return
-	}
-
-	for _, middleware := range siw.HandlerMiddlewares {
-		middleware(c)
-		if c.IsAborted() {
-			return
-		}
-	}
-
-	siw.Handler.GetMaterialNacdos(c, params)
-}
-
-// GetMaterialPoscar operation middleware
-func (siw *ServerInterfaceWrapper) GetMaterialPoscar(c *gin.Context) {
-
-	var err error
-
-	// Parameter object where we will unmarshal all parameters from the context
-	var params GetMaterialPoscarParams
-
-	// ------------- Required query parameter "id" -------------
-
-	if paramValue := c.Query("id"); paramValue != "" {
-
-	} else {
-		siw.ErrorHandler(c, fmt.Errorf("Query argument id is required, but not found"), http.StatusBadRequest)
-		return
-	}
-
-	err = runtime.BindQueryParameter("form", true, true, "id", c.Request.URL.Query(), &params.Id)
-	if err != nil {
-		siw.ErrorHandler(c, fmt.Errorf("Invalid format for parameter id: %w", err), http.StatusBadRequest)
-		return
-	}
-
-	// ------------- Required query parameter "SOC" -------------
-
-	if paramValue := c.Query("SOC"); paramValue != "" {
-
-	} else {
-		siw.ErrorHandler(c, fmt.Errorf("Query argument SOC is required, but not found"), http.StatusBadRequest)
-		return
-	}
-
-	err = runtime.BindQueryParameter("form", true, true, "SOC", c.Request.URL.Query(), &params.SOC)
-	if err != nil {
-		siw.ErrorHandler(c, fmt.Errorf("Invalid format for parameter SOC: %w", err), http.StatusBadRequest)
-		return
-	}
-
-	for _, middleware := range siw.HandlerMiddlewares {
-		middleware(c)
-		if c.IsAborted() {
-			return
-		}
-	}
-
-	siw.Handler.GetMaterialPoscar(c, params)
-}
-
-// PostSearchBrief operation middleware
-func (siw *ServerInterfaceWrapper) PostSearchBrief(c *gin.Context) {
-
-	for _, middleware := range siw.HandlerMiddlewares {
-		middleware(c)
-		if c.IsAborted() {
-			return
-		}
-	}
-
-	siw.Handler.PostSearchBrief(c)
-}
-
-// PostSearchResult operation middleware
-func (siw *ServerInterfaceWrapper) PostSearchResult(c *gin.Context) {
-
-	for _, middleware := range siw.HandlerMiddlewares {
-		middleware(c)
-		if c.IsAborted() {
-			return
-		}
-	}
-
-	siw.Handler.PostSearchResult(c)
-}
-
-// PostUpload operation middleware
-func (siw *ServerInterfaceWrapper) PostUpload(c *gin.Context) {
-
-	for _, middleware := range siw.HandlerMiddlewares {
-		middleware(c)
-		if c.IsAborted() {
-			return
-		}
-	}
-
-	siw.Handler.PostUpload(c)
+//// GetMaterialBand operation middleware
+//func (siw *ServerInterfaceWrapper) GetMaterialBand(c *gin.Context) {
+//
+//	var err error
+//
+//	// Parameter object where we will unmarshal all parameters from the context
+//	var params GetMaterialBandParams
+//
+//	// ------------- Required query parameter "id" -------------
+//
+//	if paramValue := c.Query("id"); paramValue != "" {
+//
+//	} else {
+//		siw.ErrorHandler(c, fmt.Errorf("Query argument id is required, but not found"), http.StatusBadRequest)
+//		return
+//	}
+//
+//	err = runtime.BindQueryParameter("form", true, true, "id", c.Request.URL.Query(), &params.Id)
+//	if err != nil {
+//		siw.ErrorHandler(c, fmt.Errorf("Invalid format for parameter id: %w", err), http.StatusBadRequest)
+//		return
+//	}
+//
+//	// ------------- Required query parameter "SOC" -------------
+//
+//	if paramValue := c.Query("SOC"); paramValue != "" {
+//
+//	} else {
+//		siw.ErrorHandler(c, fmt.Errorf("Query argument SOC is required, but not found"), http.StatusBadRequest)
+//		return
+//	}
+//
+//	err = runtime.BindQueryParameter("form", true, true, "SOC", c.Request.URL.Query(), &params.SOC)
+//	if err != nil {
+//		siw.ErrorHandler(c, fmt.Errorf("Invalid format for parameter SOC: %w", err), http.StatusBadRequest)
+//		return
+//	}
+//
+//	for _, middleware := range siw.HandlerMiddlewares {
+//		middleware(c)
+//		if c.IsAborted() {
+//			return
+//		}
+//	}
+//
+//	siw.Handler.GetMaterialBand(c, params)
+//}
+//
+//// GetMaterialCif operation middleware
+//func (siw *ServerInterfaceWrapper) GetMaterialCif(c *gin.Context) {
+//
+//	var err error
+//
+//	// Parameter object where we will unmarshal all parameters from the context
+//	var params GetMaterialCifParams
+//
+//	// ------------- Required query parameter "id" -------------
+//
+//	if paramValue := c.Query("id"); paramValue != "" {
+//
+//	} else {
+//		siw.ErrorHandler(c, fmt.Errorf("Query argument id is required, but not found"), http.StatusBadRequest)
+//		return
+//	}
+//
+//	err = runtime.BindQueryParameter("form", true, true, "id", c.Request.URL.Query(), &params.Id)
+//	if err != nil {
+//		siw.ErrorHandler(c, fmt.Errorf("Invalid format for parameter id: %w", err), http.StatusBadRequest)
+//		return
+//	}
+//
+//	// ------------- Required query parameter "SOC" -------------
+//
+//	if paramValue := c.Query("SOC"); paramValue != "" {
+//
+//	} else {
+//		siw.ErrorHandler(c, fmt.Errorf("Query argument SOC is required, but not found"), http.StatusBadRequest)
+//		return
+//	}
+//
+//	err = runtime.BindQueryParameter("form", true, true, "SOC", c.Request.URL.Query(), &params.SOC)
+//	if err != nil {
+//		siw.ErrorHandler(c, fmt.Errorf("Invalid format for parameter SOC: %w", err), http.StatusBadRequest)
+//		return
+//	}
+//
+//	for _, middleware := range siw.HandlerMiddlewares {
+//		middleware(c)
+//		if c.IsAborted() {
+//			return
+//		}
+//	}
+//
+//	siw.Handler.GetMaterialCif(c, params)
+//}
+//
+//// GetMaterialDetail operation middleware
+//func (siw *ServerInterfaceWrapper) GetMaterialDetail(c *gin.Context) {
+//
+//	var err error
+//
+//	// Parameter object where we will unmarshal all parameters from the context
+//	var params GetMaterialDetailParams
+//
+//	// ------------- Required query parameter "id" -------------
+//
+//	if paramValue := c.Query("id"); paramValue != "" {
+//
+//	} else {
+//		siw.ErrorHandler(c, fmt.Errorf("Query argument id is required, but not found"), http.StatusBadRequest)
+//		return
+//	}
+//
+//	err = runtime.BindQueryParameter("form", true, true, "id", c.Request.URL.Query(), &params.Id)
+//	if err != nil {
+//		siw.ErrorHandler(c, fmt.Errorf("Invalid format for parameter id: %w", err), http.StatusBadRequest)
+//		return
+//	}
+//
+//	for _, middleware := range siw.HandlerMiddlewares {
+//		middleware(c)
+//		if c.IsAborted() {
+//			return
+//		}
+//	}
+//
+//	siw.Handler.GetMaterialDetail(c, params)
+//}
+//
+//// GetMaterialNacdos operation middleware
+//func (siw *ServerInterfaceWrapper) GetMaterialNacdos(c *gin.Context) {
+//
+//	var err error
+//
+//	// Parameter object where we will unmarshal all parameters from the context
+//	var params GetMaterialNacdosParams
+//
+//	// ------------- Required query parameter "id" -------------
+//
+//	if paramValue := c.Query("id"); paramValue != "" {
+//
+//	} else {
+//		siw.ErrorHandler(c, fmt.Errorf("Query argument id is required, but not found"), http.StatusBadRequest)
+//		return
+//	}
+//
+//	err = runtime.BindQueryParameter("form", true, true, "id", c.Request.URL.Query(), &params.Id)
+//	if err != nil {
+//		siw.ErrorHandler(c, fmt.Errorf("Invalid format for parameter id: %w", err), http.StatusBadRequest)
+//		return
+//	}
+//
+//	// ------------- Required query parameter "SOC" -------------
+//
+//	if paramValue := c.Query("SOC"); paramValue != "" {
+//
+//	} else {
+//		siw.ErrorHandler(c, fmt.Errorf("Query argument SOC is required, but not found"), http.StatusBadRequest)
+//		return
+//	}
+//
+//	err = runtime.BindQueryParameter("form", true, true, "SOC", c.Request.URL.Query(), &params.SOC)
+//	if err != nil {
+//		siw.ErrorHandler(c, fmt.Errorf("Invalid format for parameter SOC: %w", err), http.StatusBadRequest)
+//		return
+//	}
+//
+//	for _, middleware := range siw.HandlerMiddlewares {
+//		middleware(c)
+//		if c.IsAborted() {
+//			return
+//		}
+//	}
+//
+//	siw.Handler.GetMaterialNacdos(c, params)
+//}
+//
+//// GetMaterialPoscar operation middleware
+//func (siw *ServerInterfaceWrapper) GetMaterialPoscar(c *gin.Context) {
+//
+//	var err error
+//
+//	// Parameter object where we will unmarshal all parameters from the context
+//	var params GetMaterialPoscarParams
+//
+//	// ------------- Required query parameter "id" -------------
+//
+//	if paramValue := c.Query("id"); paramValue != "" {
+//
+//	} else {
+//		siw.ErrorHandler(c, fmt.Errorf("Query argument id is required, but not found"), http.StatusBadRequest)
+//		return
+//	}
+//
+//	err = runtime.BindQueryParameter("form", true, true, "id", c.Request.URL.Query(), &params.Id)
+//	if err != nil {
+//		siw.ErrorHandler(c, fmt.Errorf("Invalid format for parameter id: %w", err), http.StatusBadRequest)
+//		return
+//	}
+//
+//	// ------------- Required query parameter "SOC" -------------
+//
+//	if paramValue := c.Query("SOC"); paramValue != "" {
+//
+//	} else {
+//		siw.ErrorHandler(c, fmt.Errorf("Query argument SOC is required, but not found"), http.StatusBadRequest)
+//		return
+//	}
+//
+//	err = runtime.BindQueryParameter("form", true, true, "SOC", c.Request.URL.Query(), &params.SOC)
+//	if err != nil {
+//		siw.ErrorHandler(c, fmt.Errorf("Invalid format for parameter SOC: %w", err), http.StatusBadRequest)
+//		return
+//	}
+//
+//	for _, middleware := range siw.HandlerMiddlewares {
+//		middleware(c)
+//		if c.IsAborted() {
+//			return
+//		}
+//	}
+//
+//	siw.Handler.GetMaterialPoscar(c, params)
+//}
+//
+//// PostSearchBrief operation middleware
+//func (siw *ServerInterfaceWrapper) PostSearchBrief(c *gin.Context) {
+//
+//	for _, middleware := range siw.HandlerMiddlewares {
+//		middleware(c)
+//		if c.IsAborted() {
+//			return
+//		}
+//	}
+//
+//	siw.Handler.PostSearchBrief(c)
+//}
+//
+//// PostSearchResult operation middleware
+//func (siw *ServerInterfaceWrapper) PostSearchResult(c *gin.Context) {
+//
+//	for _, middleware := range siw.HandlerMiddlewares {
+//		middleware(c)
+//		if c.IsAborted() {
+//			return
+//		}
+//	}
+//
+//	siw.Handler.PostSearchResult(c)
+//}
+//
+//// PostUpload operation middleware
+//func (siw *ServerInterfaceWrapper) PostUpload(c *gin.Context) {
+//
+//	for _, middleware := range siw.HandlerMiddlewares {
+//		middleware(c)
+//		if c.IsAborted() {
+//			return
+//		}
+//	}
+//
+//	siw.Handler.PostUpload(c)
+//}
+
+
+func (siw *ServerInterfaceWrapper) Ping(c *gin.Context) {
+	fmt.Println("ping")
+	c.String(http.StatusOK, "pong")
 }
 
 // GinServerOptions provides options for the Gin server.
@@ -338,12 +346,13 @@ func RegisterHandlersWithOptions(router gin.IRouter, si ServerInterface, options
 		ErrorHandler:       errorHandler,
 	}
 
-	router.GET(options.BaseURL+"/material/band", wrapper.GetMaterialBand)
-	router.GET(options.BaseURL+"/material/cif", wrapper.GetMaterialCif)
-	router.GET(options.BaseURL+"/material/detail", wrapper.GetMaterialDetail)
-	router.GET(options.BaseURL+"/material/nacdos", wrapper.GetMaterialNacdos)
-	router.GET(options.BaseURL+"/material/poscar", wrapper.GetMaterialPoscar)
-	router.POST(options.BaseURL+"/search/brief", wrapper.PostSearchBrief)
-	router.POST(options.BaseURL+"/search/result", wrapper.PostSearchResult)
-	router.POST(options.BaseURL+"/upload", wrapper.PostUpload)
+	router.GET(options.BaseURL+"/ping", wrapper.Ping)
+	//router.GET(options.BaseURL+"/material/band", wrapper.GetMaterialBand)
+	//router.GET(options.BaseURL+"/material/cif", wrapper.GetMaterialCif)
+	//router.GET(options.BaseURL+"/material/detail", wrapper.GetMaterialDetail)
+	//router.GET(options.BaseURL+"/material/nacdos", wrapper.GetMaterialNacdos)
+	//router.GET(options.BaseURL+"/material/poscar", wrapper.GetMaterialPoscar)
+	//router.POST(options.BaseURL+"/search/brief", wrapper.PostSearchBrief)
+	//router.POST(options.BaseURL+"/search/result", wrapper.PostSearchResult)
+	//router.POST(options.BaseURL+"/upload", wrapper.PostUpload)
 }
