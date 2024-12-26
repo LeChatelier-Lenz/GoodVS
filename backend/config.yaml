@@ -2,3 +2,9 @@ WebServer:
   Port: 8080
   ReadTimeout: 10
   WriteTimeout: 10
+Database:
+  Host: localhost
+  Port: 3306
+  User: root
+  Pass: 031716cqp0222
+  DBName: goodvs

@@ -24,7 +24,16 @@ var DB = func(ctx context.Context) *DBMS {
 // >>>>>>>>>>>> init >>>>>>>>>>>>
 
 type DBCfg struct {
-	DSN string
+	// "user:pass@tcp(127.0.0.1:3306)/dbname"
+	User   string `mapstructure:"User"`
+	Pass   string `mapstructure:"Pass"`
+	Host   string `mapstructure:"Host"`
+	Port   string `mapstructure:"Port"`
+	DBName string `mapstructure:"DBName"`
+}
+
+func (cfg DBCfg) DSN() string {
+	return fmt.Sprintf("%s:%s@tcp(%s:%s)/%s", cfg.User, cfg.Pass, cfg.Host, cfg.Port, cfg.DBName)
 }
 
 func InitDB() {
@@ -35,7 +44,7 @@ func InitDB() {
 		fmt.Println(err)
 	}
 
-	db, err = gorm.Open(mysql.Open(cfg.DSN), &gorm.Config{
+	db, err = gorm.Open(mysql.Open(cfg.DSN()), &gorm.Config{
 		TranslateError: true,
 	})
 	if err != nil {
@@ -46,5 +55,6 @@ func InitDB() {
 	if viper.GetString("App.RunLevel") == "debug" {
 		db = db.Debug()
 	}
+	fmt.Println("Database connection established")
 
 }
