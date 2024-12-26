@@ -13,7 +13,14 @@ import (
 
 // ServerInterface represents all server handlers.
 type ServerInterface interface {
+	// (GET /ping)
 	Ping(c *gin.Context)
+	// (GET /user/register)
+	Register(c *gin.Context)
+	// (GET /user/login)
+	Login(c *gin.Context)
+	// (GET /user/logout)
+	//Logout(c *gin.Context)
 	// band
 	// (GET /material/band)
 	//GetMaterialBand(c *gin.Context, params GetMaterialBandParams)
@@ -314,10 +321,37 @@ type MiddlewareFunc func(c *gin.Context)
 //}
 
 
+
+// Ping operation middleware
 func (siw *ServerInterfaceWrapper) Ping(c *gin.Context) {
 	fmt.Println("ping")
 	c.String(http.StatusOK, "pong")
 }
+
+// Register operation middleware
+func (siw *ServerInterfaceWrapper) Register(c *gin.Context) {
+	fmt.Println("Process: user register")
+	for _, middleware := range siw.HandlerMiddlewares {
+		middleware(c)
+		if c.IsAborted() {
+			return
+		}
+	}
+	siw.Handler.Register(c)
+}
+
+// Login operation middleware
+func (siw *ServerInterfaceWrapper) Login(c *gin.Context) {
+	fmt.Println("Process: user login")
+	for _, middleware := range siw.HandlerMiddlewares {
+		middleware(c)
+		if c.IsAborted() {
+			return
+		}
+	}
+	siw.Handler.Login(c)
+}
+
 
 // GinServerOptions provides options for the Gin server.
 type GinServerOptions struct {
@@ -347,6 +381,11 @@ func RegisterHandlersWithOptions(router gin.IRouter, si ServerInterface, options
 	}
 
 	router.GET(options.BaseURL+"/ping", wrapper.Ping)
+	router.POST(options.BaseURL+"/user/register", wrapper.Register)
+	router.POST(options.BaseURL+"/user/login", wrapper.Login)
+
+	// 专门用于处理非法路由请求
+
 	//router.GET(options.BaseURL+"/material/band", wrapper.GetMaterialBand)
 	//router.GET(options.BaseURL+"/material/cif", wrapper.GetMaterialCif)
 	//router.GET(options.BaseURL+"/material/detail", wrapper.GetMaterialDetail)

@@ -1,5 +1,6 @@
 import {Box, Button, Card, FormControl, FormLabel, TextField, Typography } from "@mui/material";
 import React from "react";
+import {PostSignUp} from "../actions/axios.ts";
 
 export default function SignUp() {
     const [emailError, setEmailError] = React.useState(false);
@@ -77,6 +78,22 @@ export default function SignUp() {
         // 输入验证
         if (!validateInputs()) {
             return; // 如果验证失败，停止提交
+        }
+        // 提交表单
+        try{
+            PostSignUp(email, password, name).
+            then((response) => {
+                console.log(response);
+                console.log("userID",response.data);
+                alert('注册成功');
+                window.location.href = '/';
+            }).catch((error) => {
+                console.log(error);
+                alert('注册失败');
+            });
+        } catch (error) {
+            console.log(error);
+            alert('注册失败');
         }
 
         console.log({

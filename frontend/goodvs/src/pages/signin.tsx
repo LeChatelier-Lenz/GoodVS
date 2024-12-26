@@ -1,6 +1,7 @@
 
 import { Box, Button, Card, FormControl, FormLabel, TextField, Typography } from '@mui/material';
 import React from "react";
+import {PostSignIn} from "../actions/axios.ts";
 
 export default function SignIn() {
     const [emailError, setEmailError] = React.useState(false);
@@ -67,6 +68,25 @@ export default function SignIn() {
         // 输入验证
         if (!validateInputs()) {
             return; // 如果验证失败，停止提交
+        }
+
+        try{
+            PostSignIn(email, password)
+            .then((response) => {
+                console.log(response);
+                if (response.status === 200) {
+                    console.log('登录成功');
+                    console.log("userID",response.data);
+                    alert('登录成功');
+                    window.location.href = '/'; // 登录成功，跳转到首页
+                }
+            }).catch((error) => {
+                console.log(error);
+                alert('登录失败');
+            });
+        }catch (e) {
+            console.log(e);
+            alert('登录失败');
         }
 
         console.log({

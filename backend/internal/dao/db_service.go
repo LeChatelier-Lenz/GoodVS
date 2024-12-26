@@ -1,8 +1,10 @@
 package dao
 
 import (
+	"fmt"
 	"goodvs/internal/dao/model"
 	"goodvs/server"
+	"strconv"
 
 	"github.com/sirupsen/logrus"
 	"gorm.io/gorm"
@@ -184,4 +186,42 @@ func (db DBMS) PostUpload(uploads []server.PostUploadJSONBody) (err error) {
 		}
 	}
 	return
+}
+
+// ---------------
+
+// AddUser create a new user
+func (db DBMS) AddUser(user server.UserRegisterReq) (token string, err error) {
+	var tmp model.User
+	// check if user already exist
+	err = db.Where(&model.User{
+		Email: user.Email,
+	}).First(&tmp).Error
+	if tmp != (model.User{}) || err == nil {
+		return "", fmt.Errorf("user already exist")
+	}
+	result := model.User{
+		Name:     user.Name,
+		Password: user.Password,
+		Email:    user.Email,
+	}
+	// create new user
+	err = db.Create(&result).Error
+	if err != nil {
+		return "", err
+	}
+	return strconv.FormatInt(result.Id, 10), nil
+}
+
+// ValidateUser validate user and return token
+func (db DBMS) ValidateUser(user server.UserLoginReq) (token string, err error) {
+	var result model.User
+	err = db.Where(&model.User{
+		Email:    user.Email,
+		Password: user.Password,
+	}).First(&result).Error
+	if err != nil {
+		return "", err
+	}
+	return strconv.FormatInt(result.Id, 10), nil
 }

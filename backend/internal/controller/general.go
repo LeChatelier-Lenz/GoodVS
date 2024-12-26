@@ -26,8 +26,9 @@ func ResponseSuccess(ctx *gin.Context, data any) {
 	Response(ctx, http.StatusOK, data)
 }
 
-func ResponseFail(ctx *gin.Context, err error) {
+func ResponseFail(ctx *gin.Context, err error, code int) {
 	logrus.Error(err)
+	Response(ctx, code, err.Error())
 }
 
 // <<<<<<<<<<<<<<<<< Response >>>>>>>>>>>>>>>>>

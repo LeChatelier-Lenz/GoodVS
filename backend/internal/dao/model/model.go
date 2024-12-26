@@ -9,7 +9,7 @@ import (
 
 type User struct {
 	Id       int64  `gorm:"column:id;type:int8;primaryKey;not null;" json:"id"`
-	Name     string `gorm:"column:username;type:varchar(100);not null;" json:"name"`
+	Name     string `gorm:"column:name;type:varchar(100);not null;" json:"name"`
 	Password string `gorm:"column:password;type:varchar(100);not null;" json:"password"`
 	Email    string `gorm:"column:email;type:varchar(100);not null;" json:"email"`
 }
