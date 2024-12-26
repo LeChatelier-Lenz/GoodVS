@@ -225,3 +225,50 @@ func (db DBMS) ValidateUser(user server.UserLoginReq) (token string, err error) 
 	}
 	return strconv.FormatInt(result.Id, 10), nil
 }
+
+// AddProductItem create a new product
+func (db DBMS) AddProductItem(product model.Product) (err error) {
+	// check if product already exist
+	var tmp model.Product
+	err = db.Where(&model.Product{
+		Name: product.Name,
+	}).First(&tmp).Error
+	if err == nil {
+		return fmt.Errorf("product already exist")
+	}
+	err = db.Create(&product).Error
+	return err
+}
+
+// GetProductItem get product by id
+func (db DBMS) GetProductItem(id int64) (err error, product model.Product) {
+	err = db.Where(&model.Product{
+		Id: id,
+	}).First(&product).Error
+	return err, product
+}
+
+// PutProductPriceList get product list
+func (db DBMS) PutProductPriceList(productPriceList []model.ProductPrice) (err error) {
+	for _, productPrice := range productPriceList {
+		err = db.Create(&productPrice).Error
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+// GetPriceListByProductID get price list by product id
+func (db DBMS) GetPriceListByProductID(productID int64) (err error, priceList []model.ProductPrice) {
+	err = db.Where(&model.Product{
+		Id: productID,
+	}).First(&model.Product{}).Error
+	if err != nil {
+		return err, nil
+	}
+	err = db.Where(&model.ProductPrice{
+		ProductId: productID,
+	}).Find(&priceList).Error
+	return err, priceList
+}

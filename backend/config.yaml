@@ -8,3 +8,7 @@ Database:
   User: root
   Pass: 031716cqp0222
   DBName: goodvs
+EmailServer:
+  Host: smtp.gmail.com
+  Port: 587
+  User:

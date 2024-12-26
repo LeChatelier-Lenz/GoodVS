@@ -18,6 +18,7 @@ var rootCmd = &cobra.Command{
 		dao.InitDB()
 		//// start server
 		fmt.Println("Hello, GoodVS!")
+		//service.SendEmail("3220100886@zju.edu.cn")
 		return controller.StartServer()
 
 		//return nil

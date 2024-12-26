@@ -7,11 +7,32 @@ import (
 	"github.com/jackc/pgtype"
 )
 
+// User 用户表
 type User struct {
 	Id       int64  `gorm:"column:id;type:int8;primaryKey;not null;" json:"id"`
 	Name     string `gorm:"column:name;type:varchar(100);not null;" json:"name"`
 	Password string `gorm:"column:password;type:varchar(100);not null;" json:"password"`
 	Email    string `gorm:"column:email;type:varchar(100);not null;" json:"email"`
+}
+
+// Product 商品表
+type Product struct {
+	Id            int64          `gorm:"column:id;type:int8;primaryKey;not null;" json:"id"`          // 商品ID, 唯一标识
+	Name          string         `gorm:"column:name;type:varchar(100);not null;" json:"name"`         // 商品名称（精简描述）
+	Category      string         `gorm:"column:category;type:varchar(100);not null;" json:"category"` // 一级分类
+	Type          string         `gorm:"column:type;type:varchar(100);not null;" json:"type"`         // 二级分类
+	Img           string         `gorm:"column:img;type:varchar(100);not null;" json:"img"`
+	ProductPrices []ProductPrice `gorm:"foreignKey:ProductId;references:Id" json:"product_price"` // 商品价格表
+}
+
+// ProductPrice 商品价格表
+type ProductPrice struct {
+	// 以Product表的Id作为外键
+	ProductId int64   `gorm:"column:product_id;type:int8;primaryKey;not null;" json:"product_id"` // 商品ID
+	Price     float64 `gorm:"column:price;type:float8;not null;" json:"price"`
+	Platform  string  `gorm:"column:platform;type:varchar(100);not null;" json:"platform"` // 商品来源平台
+	Url       string  `gorm:"column:url;type:varchar(100);not null;" json:"url"`
+	CreatedAt string  `gorm:"column:created_at;type:varchar(100);not null;" json:"created_at"`
 }
 
 type Symmetry struct {
