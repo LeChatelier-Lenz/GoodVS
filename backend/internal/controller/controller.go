@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
 	"goodvs/internal/dao"
@@ -57,16 +58,20 @@ func (i Impl) Login(c *gin.Context) {
 // Search search
 func (i Impl) Search(c *gin.Context) {
 	// 参数仅为一个字符串
-	var req server.SearchReq
-	err := BindReq(c, &req)
-	if err != nil {
-		logrus.Info("BindReq failed", err)
-		ResponseFail(c, err, http.StatusBadRequest)
+	reqStr, ok := c.GetQuery("product")
+	if !ok {
+		ResponseFail(c, fmt.Errorf("product is required"), http.StatusBadRequest)
 		return
 	}
-	result, err := service.Search(req)
+	//fmt.Println(reqStr)
+	//fmt.Println("Search")
+	result, err := service.Search(reqStr)
 	if err != nil {
-		logrus.Info("Search failed", err)
+		logrus.Error("Search failed: ", err) // 修改为错误日志级别
+		ResponseFail(c, err, http.StatusBadRequest)
+	}
+	for _, v := range result.Results {
+		fmt.Println(v)
 	}
 	ResponseSuccess(c, result)
 }

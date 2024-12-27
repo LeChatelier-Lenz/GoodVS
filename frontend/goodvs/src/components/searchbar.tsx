@@ -33,7 +33,7 @@ export default function CustomizedInputBase() {
 
     return (
         <Paper
-            component="form"
+            // component="form"
             sx={{ p: '2px 4px', display: 'flex', alignItems: 'center', width: 600,
                 minWidth: 300, maxWidth: 800, height: 50, borderRadius: 5, margin: 'auto'
 
