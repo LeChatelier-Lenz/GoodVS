@@ -33,6 +33,7 @@ type ProductPrice struct {
 	Platform  string  `gorm:"column:platform;type:varchar(100);not null;" json:"platform"` // 商品来源平台
 	Url       string  `gorm:"column:url;type:varchar(100);not null;" json:"url"`
 	CreatedAt string  `gorm:"column:created_at;type:varchar(100);not null;" json:"created_at"`
+	Detail    string  `gorm:"column:detail;type:varchar(100);not null;" json:"detail"` // 商品详情
 }
 
 type Symmetry struct {

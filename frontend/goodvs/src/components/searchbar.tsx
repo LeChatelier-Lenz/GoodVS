@@ -5,9 +5,11 @@ import IconButton from '@mui/material/IconButton';
 import MenuIcon from '@mui/icons-material/Menu';
 import SearchIcon from '@mui/icons-material/Search';
 import DirectionsIcon from '@mui/icons-material/Directions';
-import {useRef} from "react";
+import {useRef, useState} from "react";
+import {GetSearchResult} from "../actions/axios.ts";
 
 export default function CustomizedInputBase() {
+    const [result, setResult] = useState([]);
     const searchRef = useRef("");
 
     const handleChange = () => {
@@ -18,6 +20,15 @@ export default function CustomizedInputBase() {
 
     const handleSearch = () => {
         console.log("search value: ",searchRef.current);
+        GetSearchResult(searchRef.current)
+            .then((res) => {
+                console.log(res);
+                setResult(res.data);
+                console.log("result: ",result);
+            }).catch((err) => {
+            console.log(err);
+            alert("Search failed");
+        });
     }
 
     return (

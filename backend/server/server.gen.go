@@ -21,6 +21,9 @@ type ServerInterface interface {
 	Login(c *gin.Context)
 	// (GET /user/logout)
 	//Logout(c *gin.Context)
+	// (GET /search
+	Search(c *gin.Context)
+
 	// band
 	// (GET /material/band)
 	//GetMaterialBand(c *gin.Context, params GetMaterialBandParams)
@@ -352,6 +355,18 @@ func (siw *ServerInterfaceWrapper) Login(c *gin.Context) {
 	siw.Handler.Login(c)
 }
 
+// Search operation middleware
+func (siw *ServerInterfaceWrapper) Search(c *gin.Context) {
+	fmt.Println("Process: search")
+	for _, middleware := range siw.HandlerMiddlewares {
+		middleware(c)
+		if c.IsAborted() {
+			return
+		}
+	}
+	siw.Handler.Search(c)
+}
+
 
 // GinServerOptions provides options for the Gin server.
 type GinServerOptions struct {
@@ -383,6 +398,7 @@ func RegisterHandlersWithOptions(router gin.IRouter, si ServerInterface, options
 	router.GET(options.BaseURL+"/ping", wrapper.Ping)
 	router.POST(options.BaseURL+"/user/register", wrapper.Register)
 	router.POST(options.BaseURL+"/user/login", wrapper.Login)
+	router.GET(options.BaseURL+"/search", wrapper.Search)
 
 	// 专门用于处理非法路由请求
 

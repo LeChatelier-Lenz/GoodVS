@@ -4,6 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
 	"goodvs/internal/dao"
+	"goodvs/internal/service"
 	"goodvs/server"
 	"net/http"
 )
@@ -51,4 +52,21 @@ func (i Impl) Login(c *gin.Context) {
 		return
 	}
 	ResponseSuccess(c, token)
+}
+
+// Search search
+func (i Impl) Search(c *gin.Context) {
+	// 参数仅为一个字符串
+	var req server.SearchReq
+	err := BindReq(c, &req)
+	if err != nil {
+		logrus.Info("BindReq failed", err)
+		ResponseFail(c, err, http.StatusBadRequest)
+		return
+	}
+	result, err := service.Search(req)
+	if err != nil {
+		logrus.Info("Search failed", err)
+	}
+	ResponseSuccess(c, result)
 }

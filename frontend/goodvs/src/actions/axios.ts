@@ -25,3 +25,7 @@ export const PostSignUp = async (email: string, password: string,name: string ) 
         password: password,
     });
 }
+
+export const GetSearchResult = async (keyword: string) => {
+    return axiosInstance.get(`/search?product=${keyword}`);
+}
