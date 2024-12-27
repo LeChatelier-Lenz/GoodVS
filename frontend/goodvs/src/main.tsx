@@ -8,6 +8,7 @@ import Search from "./pages/search.tsx";
 import User from "./pages/user.tsx";
 import SignIn from "./pages/signin.tsx";
 import SignUp from "./pages/signup.tsx";
+import Home from "./pages/home.tsx";
 
 
 const router = createBrowserRouter(
@@ -17,6 +18,10 @@ const router = createBrowserRouter(
             element: < Root />,
             errorElement: <ErrorPage />,
             children: [
+                {
+                    path: '/',
+                    element: <Home />,
+                },
                 {
                     path: '/search',
                     element: <Search />,
@@ -47,7 +52,9 @@ const root = createRoot(
     document.getElementById('root') as HTMLElement
 );
 root.render(
-    <div>
+    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center',
+        width: '100%', height: '100%'
+    }}>
         <RouterProvider router={router} />
     </div>
 );

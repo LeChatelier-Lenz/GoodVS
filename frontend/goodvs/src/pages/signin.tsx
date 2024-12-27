@@ -2,6 +2,8 @@
 import { Box, Button, Card, FormControl, FormLabel, TextField, Typography } from '@mui/material';
 import React from "react";
 import {PostSignIn} from "../actions/axios.ts";
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import IconButton from "@mui/material/IconButton";
 
 export default function SignIn() {
     const [emailError, setEmailError] = React.useState(false);
@@ -103,11 +105,28 @@ export default function SignIn() {
                   width: '100%',
                   padding: 2, maxWidth: 400, margin: 'auto',
                   align:"center", marginTop: 10 ,alignSelf: 'center',
-                  verticalAlign: 'middle'
+                  verticalAlign: 'middle',
+                  py : { xs: 4, sm: 8 },
+                  px : { xs: 4, sm: 8 },
+                  gap : 4,
+                  borderRadius: "15px",
+                    boxShadow: 3,
               }}>
+            <IconButton
+                size="large"
+                edge="start"
+                color="inherit"
+                aria-label="open drawer"
+                sx={{ mr: 2 }}
+                onClick={() => {
+                    window.location.href = "/";
+                }}
+            >
+                <ArrowBackIcon />
+            </IconButton>
             <Typography
                 component="h1"
-                variant="h4"
+                variant="h6"
                 align="center"
                 gutterBottom
                 sx={{ fontWeight: 'bold' }}
@@ -127,10 +146,10 @@ export default function SignIn() {
                         required
                         fullWidth
                         id="name"
+                        variant="standard"
                         placeholder="用户名"
                         error={nameError}
                         helperText={nameErrorMessage}
-
                     />
                 </FormControl>
                 <FormControl>
@@ -142,7 +161,7 @@ export default function SignIn() {
                         placeholder="your@email.com"
                         name="email"
                         autoComplete="email"
-                        variant="outlined"
+                        variant="standard"
                         error={emailError}
                         helperText={emailErrorMessage}
                         color={passwordError ? 'error' : 'primary'}
@@ -158,7 +177,7 @@ export default function SignIn() {
                         name="password"
                         type="password"
                         autoComplete="new-password"
-                        variant="outlined"
+                        variant="standard"
                         error={passwordError}
                         helperText={passwordErrorMessage}
                         color={passwordError ? 'error' : 'primary'}
@@ -167,10 +186,13 @@ export default function SignIn() {
                 <Button
                     type="submit"
                     variant="contained"
-                    sx={{ width: '100%', marginTop: 2 }}
+                    sx={{ width: '100%', marginTop: 2 , alignSelf: 'center'}}
                     onClick={validateInputs}
                 >
                     登 录
+                </Button>
+                <Button>
+                    <a href="/signup">未拥有账户 前往注册</a>
                 </Button>
             </Box>
         </Card>

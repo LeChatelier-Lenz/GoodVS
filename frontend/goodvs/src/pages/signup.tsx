@@ -1,6 +1,8 @@
 import {Box, Button, Card, FormControl, FormLabel, TextField, Typography } from "@mui/material";
 import React from "react";
 import {PostSignUp} from "../actions/axios.ts";
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import IconButton from "@mui/material/IconButton";
 
 export default function SignUp() {
     const [emailError, setEmailError] = React.useState(false);
@@ -110,11 +112,28 @@ export default function SignUp() {
                       width: '100%',
                       padding: 2, maxWidth: 400, margin: 'auto',
                       align:"center", marginTop: 10 ,alignSelf: 'center',
-                      verticalAlign: 'middle'
+                      verticalAlign: 'middle',
+                      py : { xs: 4, sm: 8 },
+                      px : { xs: 4, sm: 8 },
+                      gap : 4,
+                      borderRadius: "15px",
+                      boxShadow: 3,
             }}>
+                <IconButton
+                    size="large"
+                    edge="start"
+                    color="inherit"
+                    aria-label="open drawer"
+                    sx={{ mr: 2 }}
+                    onClick={() => {
+                        window.location.href = "/";
+                    }}
+                >
+                    <ArrowBackIcon />
+                </IconButton>
                 <Typography
                     component="h1"
-                    variant="h4"
+                    variant="h6"
                     align="center"
                     gutterBottom
                     sx={{ fontWeight: 'bold' }}
@@ -134,6 +153,7 @@ export default function SignUp() {
                             required
                             fullWidth
                             id="name"
+                            variant="standard"
                             placeholder="用户名"
                             error={nameError}
                             helperText={nameErrorMessage}
@@ -149,7 +169,7 @@ export default function SignUp() {
                             placeholder="your@email.com"
                             name="email"
                             autoComplete="email"
-                            variant="outlined"
+                            variant="standard"
                             error={emailError}
                             helperText={emailErrorMessage}
                             color={passwordError ? 'error' : 'primary'}
@@ -165,7 +185,7 @@ export default function SignUp() {
                             name="password"
                             type="password"
                             autoComplete="new-password"
-                            variant="outlined"
+                            variant="standard"
                             error={passwordError}
                             helperText={passwordErrorMessage}
                             color={passwordError ? 'error' : 'primary'}
@@ -181,7 +201,7 @@ export default function SignUp() {
                             name="confirm"
                             type="password"
                             autoComplete="new-password"
-                            variant="outlined"
+                            variant="standard"
                             error={passwordError}
                             helperText={passwordErrorMessage}
                             color={passwordError ? 'error' : 'primary'}
@@ -194,6 +214,9 @@ export default function SignUp() {
                         onClick={validateInputs}
                     >
                         注 册
+                    </Button>
+                    <Button>
+                        <a href="/signin">已拥有账户 前往登录</a>
                     </Button>
                 </Box>
             </Card>
