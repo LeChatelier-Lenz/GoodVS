@@ -1,7 +1,7 @@
 WebServer:
   Port: 8080
-  ReadTimeout: 10
-  WriteTimeout: 10
+  ReadTimeout: 40
+  WriteTimeout: 40
 Database:
   Host: localhost
   Port: 3306

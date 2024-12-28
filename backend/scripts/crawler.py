@@ -34,7 +34,7 @@ def get_suning(keywords):
     links = page.eles('.product-box ')
     # 遍历所有<a>元素
     result = []
-    for link in links[:3]:
+    for link in links[:5]:
         # 打印链接信息
         # print(link.html)
         img_url = link.ele('.res-img').ele('.img-block').child().child().attr('src')
