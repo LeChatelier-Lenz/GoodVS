@@ -5,6 +5,7 @@ import (
 	"goodvs/internal/dao/model"
 	"goodvs/server"
 	"strconv"
+	"time"
 
 	"github.com/sirupsen/logrus"
 	"gorm.io/gorm"
@@ -217,31 +218,59 @@ func (db DBMS) AddUser(user server.UserRegisterReq) (token string, err error) {
 func (db DBMS) ValidateUser(user server.UserLoginReq) (token string, err error) {
 	var result model.User
 	err = db.Where(&model.User{
-		Email:    user.Email,
-		Password: user.Password,
+		Email: user.Email,
+		//Password: user.Password,
 	}).First(&result).Error
 	if err != nil {
-		return "", err
+		thisErr := fmt.Errorf("user not exist")
+		return "", thisErr
+	}
+	if result.Password != user.Password {
+		thisErr := fmt.Errorf("password not correct")
+		return "", thisErr
 	}
 	return strconv.FormatInt(result.Id, 10), nil
 }
 
-// AddProductItem create a new product
-func (db DBMS) AddProductItem(product model.Product) (err error) {
+//// AddProduct add a new product into database
+//// step 1: check if product already exist
+//// step 2: create new product
+//// step 3: add price list
+//func (db DBMS) AddProduct(products []server.ProductByCraw) (err error) {
+//	var product model.Product
+//	result = db.Where(&model.Product{
+//		Name: products[0].Name,
+//	}).Find(&product)
+//	if result.Error == nil {
+//		fmt.Println("product already exist")
+//	} else {
+//		// create new product
+//	}
+//	return err
+//}
+
+// AddProductItem purely add a new product item into database
+func (db DBMS) AddProductItem(product server.ProductByCraw) (productId int64, err error) {
 	// check if product already exist
 	var tmp model.Product
 	err = db.Where(&model.Product{
 		Name: product.Name,
 	}).First(&tmp).Error
 	if err == nil {
-		return fmt.Errorf("product already exist")
+		// product already exist
+		logrus.Info("product already exist")
+		return tmp.Id, nil
 	}
-	err = db.Create(&product).Error
-	return err
+	// create new product
+	var newProductItem model.Product
+	// 从server.ProductByCraw转换为model.Product
+	//newProductItem.Unmarshal(&product)
+	err = db.Create(&newProductItem).Error
+	return newProductItem.Id, err
 }
 
-// GetProductItem get product by id
-func (db DBMS) GetProductItem(id int64) (err error, product model.Product) {
+// GetProductItemById get product by id
+func (db DBMS) GetProductItemById(id int64) (err error, product model.Product) {
 	err = db.Where(&model.Product{
 		Id: id,
 	}).First(&product).Error
@@ -249,10 +278,24 @@ func (db DBMS) GetProductItem(id int64) (err error, product model.Product) {
 }
 
 // PutProductPriceList get product list
-func (db DBMS) PutProductPriceList(productPriceList []model.ProductPrice) (err error) {
-	for _, productPrice := range productPriceList {
-		err = db.Create(&productPrice).Error
+func (db DBMS) PutProductPriceList(productPriceList []server.ProductByCraw) (err error) {
+	productID, err := db.AddProductItem(productPriceList[0])
+	if err != nil {
+		logrus.Error("fail to add product item")
+		return err
+	}
+	for _, product := range productPriceList {
+		newProductPrice := model.ProductPrice{
+			ProductId: productID,
+			Price:     product.Price,
+			Platform:  product.Platform,
+			Detail:    product.Title,
+			//Url:       product.ImgUrl,
+			CreatedAt: time.Now(),
+		}
+		err = db.Create(&newProductPrice).Error
 		if err != nil {
+			logrus.Error("fail to create in table ProductPrice")
 			return err
 		}
 	}

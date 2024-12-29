@@ -87,8 +87,9 @@ export default function SignUp() {
             then((response) => {
                 console.log(response);
                 console.log("userID",response.data);
+                // localStorage.setItem('userID', response.data);
                 alert('注册成功');
-                window.location.href = '/';
+                window.location.href = '/signin';
             }).catch((error) => {
                 console.log(error);
                 alert('注册失败');

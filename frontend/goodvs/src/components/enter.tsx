@@ -11,7 +11,7 @@ export default function Enter() {
         <button className ="button"
             onClick={handleClick}
         >
-            Try GoodVs | 开始使用
+            Try GoodVS | 开始使用
         </button>
     );
 }

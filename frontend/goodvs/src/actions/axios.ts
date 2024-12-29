@@ -25,6 +25,13 @@ export const PostSignUp = async (email: string, password: string,name: string ) 
         password: password,
     });
 }
+//
+// export const PostLogout = async (userID: string) => {
+//     return axiosInstance.post('/user/logout', {
+//         user_id: userID,
+//     });
+// }
+
 
 export const GetSearchResult = async (keyword: string) => {
     return axiosInstance.get(`/search?product=${keyword}`);

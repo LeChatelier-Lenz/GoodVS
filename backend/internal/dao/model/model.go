@@ -3,6 +3,7 @@ package model
 import (
 	"database/sql"
 	"goodvs/server"
+	"time"
 
 	"github.com/jackc/pgtype"
 )
@@ -28,12 +29,12 @@ type Product struct {
 // ProductPrice 商品价格表
 type ProductPrice struct {
 	// 以Product表的Id作为外键
-	ProductId int64   `gorm:"column:product_id;type:int8;primaryKey;not null;" json:"product_id"` // 商品ID
-	Price     float64 `gorm:"column:price;type:float8;not null;" json:"price"`
-	Platform  string  `gorm:"column:platform;type:varchar(100);not null;" json:"platform"` // 商品来源平台
-	Url       string  `gorm:"column:url;type:varchar(100);not null;" json:"url"`
-	CreatedAt string  `gorm:"column:created_at;type:varchar(100);not null;" json:"created_at"`
-	Detail    string  `gorm:"column:detail;type:varchar(100);not null;" json:"detail"` // 商品详情
+	ProductId int64     `gorm:"column:product_id;type:int8;primaryKey;not null;" json:"product_id"` // 商品ID
+	Price     float64   `gorm:"column:price;type:float8;not null;" json:"price"`
+	Platform  string    `gorm:"column:platform;type:varchar(100);not null;" json:"platform"` // 商品来源平台
+	Url       string    `gorm:"column:url;type:varchar(100);not null;" json:"url"`
+	CreatedAt time.Time `gorm:"column:created_at;type:varchar(100);not null;" json:"created_at"`
+	Detail    string    `gorm:"column:detail;type:varchar(100);not null;" json:"detail"` // 商品详情
 }
 
 type Symmetry struct {

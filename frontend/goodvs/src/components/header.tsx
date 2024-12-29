@@ -54,7 +54,11 @@ export default function Header() {
                     </Typography>
                     <IconButton size="large" aria-label="search" color="inherit"
                         onClick={() => {
-                            window.location.href = "/signin";
+                            if(localStorage.getItem('userID') === null) {
+                                window.location.href = "/signin";
+                            }else {
+                                window.location.href = "/user";
+                            }
                         }}
                     >
                         <AccountCircleIcon />

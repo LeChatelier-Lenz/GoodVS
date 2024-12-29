@@ -28,13 +28,13 @@ func (i Impl) Register(c *gin.Context) {
 		ResponseFail(c, err, http.StatusBadRequest)
 		return
 	}
-	token, err := dao.DB(c).AddUser(user)
+	_, err = dao.DB(c).AddUser(user)
 	if err != nil {
 		logrus.Info("AddUser failed", err)
 		ResponseFail(c, err, http.StatusBadRequest)
 		return
 	}
-	ResponseSuccess(c, token)
+	ResponseSuccess(c, nil)
 }
 
 // Login login
@@ -65,12 +65,13 @@ func (i Impl) Search(c *gin.Context) {
 	}
 	//fmt.Println(reqStr)
 	//fmt.Println("Search")
-	result, err := service.Search(reqStr)
+	result, err := service.SearchCallByFrontend(reqStr)
+
 	if err != nil {
 		logrus.Error("Search failed: ", err) // 修改为错误日志级别
 		ResponseFail(c, err, http.StatusBadRequest)
 	}
-	for _, v := range result.Results {
+	for _, v := range result {
 		fmt.Println(v)
 	}
 	ResponseSuccess(c, result)

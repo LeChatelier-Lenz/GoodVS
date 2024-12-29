@@ -3,6 +3,7 @@ package service
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/sirupsen/logrus"
 	"goodvs/server"
 	"io"
 	"log"
@@ -10,87 +11,156 @@ import (
 	"os/exec"
 )
 
-type CrawlerData struct {
-	Name     string  `json:"name"`
-	ImgUrl   string  `json:"img_url"`
-	Price    float64 `json:"price"`
-	Title    string  `json:"title"`
-	Category string  `json:"category"`
-	Platform string  `json:"platform"`
+// SearchCallByFrontend search
+func SearchCallByFrontend(reqStr string) (data []server.ProductByCraw, err error) {
+	return Search(reqStr, 0)
 }
 
 // Search search
-func Search(reqStr string) (resps server.SearchRes, err error) {
-	// todo: implement Search
+func Search(reqStr string, opt int) (data []server.ProductByCraw, err error) {
+	// implement Search
 	// step1: 处理请求参数，进行分词处理
 	// step2: 调用python爬虫脚本，获取搜索结果
 	// 上面两步可以合并为一个步骤，调用python爬虫脚本，获取搜索结果
-	fmt.Println(reqStr)
-	data, err := WebCrawlingByPython(reqStr)
-	if err != nil {
-		return server.SearchRes{}, err
+	//fmt.Println(reqStr)
+	var choice string
+	if opt == 0 {
+		choice = "f"
+	} else {
+		choice = "r"
 	}
-	for i, v := range data {
-		resp := server.ProductByCraw{
-			Id:       fmt.Sprintf("%d", i),
+	result, err := WebCrawlingByPython(reqStr, choice)
+	if err != nil {
+		return nil, err
+	}
+	var category = result[0].Category // 暂时只取第一个商品的category
+	for _, v := range result {
+		r := server.ProductByCraw{
 			Name:     v.Name,
 			ImgUrl:   v.ImgUrl,
 			Price:    v.Price,
-			Category: v.Category,
+			Title:    v.Title,
+			Category: category,
 			Platform: v.Platform,
 		}
-		resps.Results = append(resps.Results, resp)
+		data = append(data, r)
 	}
-	//fmt.Println(data)
-
-	// step3: 如果是第一次搜索，将搜索结果(product)存入数据库
-
-	// step4: 如果距离上次搜索时间超过一定时间，将搜索结果(product price list)存入数据库
-
-	// step5: 返回搜索结果
-
-	return resps, nil
+	return data, nil
 }
 
 // WebCrawlingByPython 调用Python爬虫脚本
-func WebCrawlingByPython(input string) ([]CrawlerData, error) {
-	cmd := exec.Command("python", "./scripts/crawler.py", input)
+// 利用goroutine并发调用JD和SN的爬虫脚本
+func WebCrawlingByPython(input string, choice string) (result []server.ProductByCraw, err error) {
+	chJd := make(chan []server.ProductByCraw, 200)
+	chSn := make(chan []server.ProductByCraw, 200)
+	go JDScript(input, choice, chJd)
+	go SNScript(input, choice, chSn)
+	dataJd := <-chJd
+	if len(dataJd) == 0 || dataJd == nil {
+		err = fmt.Errorf("JD WebCrawler Python script executed failed")
+	}
+	dataSn := <-chSn
+	if len(dataSn) == 0 || dataSn == nil {
+		err = fmt.Errorf("SN WebCrawler Python script executed failed")
+	}
+	result = append(dataJd, dataSn...)
+	return result, err
+}
+
+// JDScript 调用JD爬虫脚本
+func JDScript(input string, choice string, c chan []server.ProductByCraw) {
+	result, err := ExecutePyCrawlerScript("jd", input, choice)
+	if err == nil {
+		fmt.Println("JD WebCrawler Python script executed successfully")
+	} else {
+		fmt.Println("JD WebCrawler Python script executed failed")
+		logrus.Fatal(err)
+	}
+	c <- result
+	close(c)
+}
+
+// SNScript 调用SN爬虫脚本
+func SNScript(input string, choice string, c chan []server.ProductByCraw) {
+	result, err := ExecutePyCrawlerScript("sn", input, choice)
+	if err == nil {
+		fmt.Println("SN WebCrawler Python script executed successfully")
+	} else {
+		fmt.Println("SN WebCrawler Python script executed failed")
+		logrus.Fatal(err)
+	}
+	c <- result
+	close(c)
+}
+
+// ExecutePyCrawlerScript 执行Python爬虫脚本
+// platform: 爬虫脚本平台
+// input: 搜索关键字
+// choice: 选择搜索模式
+func ExecutePyCrawlerScript(platform string, input string, choice string) ([]server.ProductByCraw, error) {
+	cmd := exec.Command("python", "./scripts/"+platform+"_crawler.py", choice, input)
 	fmt.Println(cmd.String())
 	_, err := cmd.CombinedOutput()
-	//fmt.Println(stdOutStdErr)
 	if err != nil {
-		fmt.Println("Error executing Python script:", err)
-		return []CrawlerData{}, err
+		fmt.Println("Error executing "+platform+" WebCrawler Python script:", err)
+		return nil, err
 	}
-	file, err := os.Open("result.json")
+	file, err := os.Open("./tmp/" + platform + "_result.json")
 	if err != nil {
-		fmt.Println("Error opening result.json:", err)
-		return []CrawlerData{}, err
+		fmt.Println("Error opening "+platform+"_result.json:", err)
+		return nil, err
 	}
 	fileContents, err := io.ReadAll(file)
 	if err != nil {
 		log.Fatal(err) // 如果读取失败，则退出程序
+		return nil, err
 	}
 	//fmt.Println(string(output)) // 这里最好输出用JSON转成对象
-	var data []CrawlerData
+	var data []server.ProductByCraw
 	err = json.Unmarshal(fileContents, &data)
 	if err != nil {
 		log.Fatal(err)
-		return []CrawlerData{}, err
+		return nil, err
 	}
-	fmt.Println("Python script executed successfully")
 	return data, nil
 }
 
-// 已弃用
+// SegmentText 搜索前对文本进行分词处理
+// 1. 使用结巴分词对文本进行分词处理
+// 2. 去除停用词
+// 3. 按照一定规则对分词结果进行排序
 //func SegmentText(text string) ([]string, error) {
-//	jieba := gojieba.NewJieba()
-//	defer jieba.Free()
-//	// 精确模式分词
-//	words := jieba.Cut(text, true)
-//	fmt.Println("精确模式:", words)
+//	tokenizer := gojieba.NewJieba()
+//	defer tokenizer.Free()
+//	// 搜索模式
+//	words := tokenizer.Cut(text, true)
+//	fmt.Println("搜索模式:", words)
 //	if words == nil {
 //		return nil, fmt.Errorf("jieba cut failed")
 //	}
+//	// 去除停用词
+//	words = RemoveStopWords(words)
+//	// 按照一定规则对分词结果进行排序
+//	sort.Strings(words)
 //	return words, nil
+//}
+//
+//// RemoveStopWords 去除停用词
+//func RemoveStopWords(words []string) []string {
+//	stopWords := []string{"的", "了", "和", "是", "就", "都", "而", "及", "与", "或", "于", "之", "从", "也", "在"}
+//	var res []string
+//	for _, w := range words {
+//		for _, s := range stopWords {
+//			if strings.Contains(w, s) {
+//				if w != s {
+//					// 去除停用词
+//					res = append(res, strings.ReplaceAll(w, s, ""))
+//				}
+//				break
+//			}
+//		}
+//		// 保留非停用词
+//		res = append(res, w)
+//	}
+//	return res
 //}

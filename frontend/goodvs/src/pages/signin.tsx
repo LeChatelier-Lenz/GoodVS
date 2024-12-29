@@ -79,8 +79,11 @@ export default function SignIn() {
                 if (response.status === 200) {
                     console.log('登录成功');
                     console.log("userID",response.data);
-                    alert('登录成功');
-                    window.location.href = '/'; // 登录成功，跳转到首页
+                    localStorage.setItem('userID', response.data);
+                    localStorage.setItem('email', email);
+                    localStorage.setItem('name', name);
+                    // alert('登录成功');
+                    window.location.href = '/user'; // 登录成功，跳转到用户页面
                 }
             }).catch((error) => {
                 console.log(error);

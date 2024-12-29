@@ -191,15 +191,24 @@ type SearchReq struct {
 	ProductStr string `json:"product"`
 }
 
-
 type ProductByCraw struct {
-	Id string `json:"id"`
-	Name string `json:"name"`
-	ImgUrl string `json:"img_url"`
-	Price float64 `json:"price"`
-	Category string `json:"category"`
-	Platform string `json:"platform"`
+	Name     string  `json:"name"`
+	ImgUrl   string  `json:"img_url"`
+	Price    float64 `json:"price"`
+	Title    string  `json:"title"`
+	Category string  `json:"category"`
+	Platform string  `json:"platform"`
 }
+
+
+//type ProductByCraw struct {
+//	Id string `json:"id"`
+//	Name string `json:"name"`
+//	ImgUrl string `json:"img_url"`
+//	Price float64 `json:"price"`
+//	Category string `json:"category"`
+//	Platform string `json:"platform"`
+//}
 
 
 type SearchRes struct {
