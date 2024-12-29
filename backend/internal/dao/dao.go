@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/spf13/viper"
+	"goodvs/internal/dao/model"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 )
@@ -33,7 +34,7 @@ type DBCfg struct {
 }
 
 func (cfg DBCfg) DSN() string {
-	return fmt.Sprintf("%s:%s@tcp(%s:%s)/%s", cfg.User, cfg.Pass, cfg.Host, cfg.Port, cfg.DBName)
+	return fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8&parseTime=true", cfg.User, cfg.Pass, cfg.Host, cfg.Port, cfg.DBName)
 }
 
 func InitDB() {
@@ -45,10 +46,17 @@ func InitDB() {
 	}
 
 	db, err = gorm.Open(mysql.Open(cfg.DSN()), &gorm.Config{
-		TranslateError: true,
+		TranslateError:                           true,
+		DisableForeignKeyConstraintWhenMigrating: true,
 	})
 	if err != nil {
 		fmt.Println("Error opening database connection")
+		fmt.Println(err)
+	}
+
+	err = db.AutoMigrate(&model.User{}, &model.Product{}, &model.ProductPrice{}, &model.Follow{})
+	if err != nil {
+		fmt.Println("Error migrating database")
 		fmt.Println(err)
 	}
 

@@ -75,10 +75,15 @@ func (i Impl) Search(c *gin.Context) {
 	}
 	errCount := 0
 	for _, v := range result {
+		//logrus.Info("AddProductItem: ", v)
 		productId, err := dao.DB(c).AddProductItem(v)
 		if err != nil {
 			logrus.Error("AddProductItem failed: ", err) // 修改为错误日志级别
 			errCount++
+			continue
+		}
+		if productId == "###" {
+			// 产品已存在
 			continue
 		}
 		err = dao.DB(c).AddProductPrice(productId, v.Price)
@@ -170,10 +175,10 @@ func (i Impl) GetFollowList(c *gin.Context) {
 		ResponseFail(c, err, http.StatusBadRequest)
 		return
 	}
-	followList, err := dao.DB(c).GetUserFollowList(userId)
+	followProductList, err := dao.DB(c).GetUserFollowList(userId)
 	if err != nil {
 		ResponseFail(c, err, http.StatusBadRequest)
 		return
 	}
-	ResponseSuccess(c, followList)
+	ResponseSuccess(c, followProductList)
 }

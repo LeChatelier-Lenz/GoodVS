@@ -9,25 +9,45 @@ import {
     // ListItemText,
     Avatar,
     Container,
-    Grid2, Divider, CardMedia
+    Grid2, Divider
 } from '@mui/material';
 import { ArrowForward as ArrowForwardIcon } from '@mui/icons-material';
 // import IconButton from "@mui/material/IconButton";
 import Button from "@mui/material/Button";
+import {useEffect, useState} from "react";
+import { GetFollowingProducts} from "../actions/axios.ts";
+import ProductCard from "../components/productItem.tsx";
 // import {PostLogout} from "../actions/axios.ts";
 
 export default function User () {
     // 示例数据
+    interface product{
+        "id":string,
+        "name":string,
+        "url":string,
+        "img_url":string,
+        "price":number,
+        "title":string,
+        "category":string,
+        "platform":string
+    }
+
     const user = {
         username: localStorage.getItem('name') || 'John Doe',
         email: localStorage.getItem('email') || 'goodvs@example.com',
     };
 
-    const followedProducts = [
-        { name: 'Product 1', price: '$199', image: 'https://via.placeholder.com/150', link: '#' },
-        { name: 'Product 2', price: '$299', image: 'https://via.placeholder.com/150', link: '#' },
-        { name: 'Product 3', price: '$399', image: 'https://via.placeholder.com/150', link: '#' }
-    ];
+    const [followedProducts,setFollowProducts] = useState<product[]>([]);
+
+    useEffect(() => {
+        GetFollowingProducts(Number(localStorage.getItem('userID')))
+            .then((res) => {
+                console.log(res);
+                setFollowProducts(res.data);
+            }).catch((err) => {
+            console.log(err);
+        });
+    }, []);
 
     const handleLogout = () => {
         localStorage.removeItem('userID');
@@ -120,18 +140,17 @@ export default function User () {
                         {followedProducts.map((product, index) => (
                             <Grid2 key={index} size={6}
                             >
-                                <Card variant="outlined">
-                                    <CardMedia
-                                        component="img"
-                                        height="140"
-                                        image={product.image}
-                                        alt={product.name}
-                                    />
-                                    <CardContent>
-                                        <Typography variant="body1">{product.name}</Typography>
-                                        <Typography variant="body2" color="textSecondary">{product.price}</Typography>
-                                    </CardContent>
-                                </Card>
+                                <ProductCard
+                                    id={product.id}
+                                    title={product.title}
+                                    category={product.category}
+                                    url={product.url}
+                                    imageUrl={product.img_url}
+                                    price={product.price}
+                                    platform={product.platform}
+                                    productName={product.name}
+                                    favorited={true}
+                                />
                             </Grid2>
                         ))}
                     </Grid2>

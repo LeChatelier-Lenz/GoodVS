@@ -42,15 +42,23 @@ export default function Header() {
                             window.location.href = "/";
                         }}
                     >
-                        <ArrowBackIcon />
+                        <ArrowBackIcon
+                            sx={{
+                                fontSize: 40,
+                            }}
+                        />
                     </IconButton>
                     <Typography
-                        variant="h5"
+                        variant="h3"
                         noWrap
                         component="div"
-                        sx={{ flexGrow: 1, alignSelf: 'flex-end' }}
+                        sx={{
+                            flexGrow: 1,
+                            alignSelf: 'flex-end',
+                            fontFamily:"fantasy"
+                    }}
                     >
-                        Come on! GoodVS
+                        Let's GoodVS!
                     </Typography>
                     <IconButton size="large" aria-label="search" color="inherit"
                         onClick={() => {
@@ -61,7 +69,11 @@ export default function Header() {
                             }
                         }}
                     >
-                        <AccountCircleIcon />
+                        <AccountCircleIcon
+                            sx={{
+                                fontSize: 40,
+                            }}
+                        />
                     </IconButton>
                     <IconButton
                         size="large"
@@ -69,7 +81,11 @@ export default function Header() {
                         edge="end"
                         color="inherit"
                     >
-                        <MoreIcon />
+                        <MoreIcon
+                            sx={{
+                                fontSize: 40,
+                            }}
+                        />
                     </IconButton>
                 </StyledToolbar>
             </AppBar>

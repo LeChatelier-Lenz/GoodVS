@@ -59,9 +59,10 @@ func (db DBMS) AddProductItem(products server.ProductByCraw) (productId string, 
 		Name: products.Name,
 		Id:   products.Id,
 	}).Find(&product)
-	if result.Error == nil {
+	if result.Error == nil && result.RowsAffected != 0 {
 		// product already exist
-		return productId, nil
+		logrus.Info("product already exist")
+		return "###", fmt.Errorf("product already exist")
 	}
 	newProduct := model.Product{
 		Id:       products.Id,
@@ -104,6 +105,14 @@ func (db DBMS) GetProductItem(name string, id string) (product model.Product, er
 	return product, err
 }
 
+// GetProductItemByID get product
+func (db DBMS) GetProductItemByID(productID string) (product model.Product, err error) {
+	err = db.Where(&model.Product{
+		Id: productID,
+	}).First(&product).Error
+	return product, err
+}
+
 // GetProductPriceList get price list by product id
 func (db DBMS) GetProductPriceList(productID string) (err error, priceList []model.ProductPrice) {
 	err = db.Where(&model.Product{
@@ -123,6 +132,17 @@ func (db DBMS) GetProductPriceList(productID string) (err error, priceList []mod
 	return err, priceList
 }
 
+func (db DBMS) GetLatestProductPrice(productID string) (price float64, err error) {
+	var productPrice model.ProductPrice
+	err = db.Where(&model.ProductPrice{
+		ProductId: productID,
+	}).Order("created_at desc").First(&productPrice).Error
+	if err != nil {
+		return -1, err
+	}
+	return productPrice.Price, nil
+}
+
 // AddFollow add a new follow
 func (db DBMS) AddFollow(productID string, userID int64) (err error) {
 	// check if already follow
@@ -131,7 +151,7 @@ func (db DBMS) AddFollow(productID string, userID int64) (err error) {
 		ProductId: productID,
 		UserId:    userID,
 	}).Find(&follow)
-	if result.Error == nil {
+	if result.Error == nil && result.RowsAffected != 0 {
 		// already follow
 		return fmt.Errorf("already follow")
 	}
@@ -148,7 +168,8 @@ func (db DBMS) AddFollow(productID string, userID int64) (err error) {
 }
 
 // GetUserFollowList get user follow list
-func (db DBMS) GetUserFollowList(userID int64) (followList []model.Follow, err error) {
+func (db DBMS) GetUserFollowList(userID int64) (productList []server.ProductByCraw, err error) {
+	var followList []model.Follow
 	userSearch := db.Where(&model.User{
 		Id: userID,
 	}).Find(&model.User{})
@@ -161,7 +182,21 @@ func (db DBMS) GetUserFollowList(userID int64) (followList []model.Follow, err e
 	if len(followList) == 0 {
 		return nil, fmt.Errorf("you have not follow any product")
 	}
-	return followList, err
+	for _, follow := range followList {
+		product, err := db.GetProductItemByID(follow.ProductId)
+		if err != nil {
+			logrus.Error("fail to get product item")
+			return nil, err
+		}
+		resp := product.Marshal()
+		resp.Price, err = db.GetLatestProductPrice(follow.ProductId)
+		if err != nil || resp.Price == -1 {
+			logrus.Error("fail to get latest price")
+			return nil, err
+		}
+		productList = append(productList, resp)
+	}
+	return productList, err
 }
 
 // RemoveFollow remove a follow

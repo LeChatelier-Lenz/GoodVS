@@ -5,11 +5,16 @@ import IconButton from '@mui/material/IconButton';
 import MenuIcon from '@mui/icons-material/Menu';
 import SearchIcon from '@mui/icons-material/Search';
 import DirectionsIcon from '@mui/icons-material/Directions';
-import {useRef, useState} from "react";
+import {useRef} from "react";
 import {GetSearchResult} from "../actions/axios.ts";
 
-export default function CustomizedInputBase() {
-    const [result, setResult] = useState([]);
+
+interface CustomizedInputBaseProps {
+    handleResult?: (data: any[]) => void
+}
+
+export default function CustomizedInputBase({handleResult}: CustomizedInputBaseProps) {
+    // const [result, setResult] = useState([]);
     const searchRef = useRef("");
 
     const handleChange = () => {
@@ -19,12 +24,13 @@ export default function CustomizedInputBase() {
     }
 
     const handleSearch = () => {
-        console.log("search value: ",searchRef.current);
+        console.log("search value: ", searchRef.current);
         GetSearchResult(searchRef.current)
             .then((res) => {
                 console.log(res);
-                setResult(res.data);
-                console.log("result: ",result);
+                if (handleResult) {
+                    handleResult(res.data.results)
+                }
             }).catch((err) => {
             console.log(err);
             alert("Search failed");
@@ -34,33 +40,34 @@ export default function CustomizedInputBase() {
     return (
         <Paper
             // component="form"
-            sx={{ p: '2px 4px', display: 'flex', alignItems: 'center', width: 600,
+            sx={{
+                p: '2px 4px', display: 'flex', alignItems: 'center', width: 600,
                 minWidth: 300, maxWidth: 800, height: 50, borderRadius: 5, margin: 'auto'
 
-        }}
+            }}
             onSubmit={handleSearch}
         >
-            <IconButton sx={{ p: '20px' }} aria-label="menu">
-                <MenuIcon />
+            <IconButton sx={{p: '20px'}} aria-label="menu">
+                <MenuIcon/>
             </IconButton>
             <InputBase
-                sx={{ ml: 2, flex: 2 }}
+                sx={{ml: 2, flex: 2}}
                 size="medium"
                 placeholder="Search Product"
-                inputProps={{ 'aria-label': 'product' }}
-                id = "product"
-                name = "product"
+                inputProps={{'aria-label': 'product'}}
+                id="product"
+                name="product"
                 onChange={handleChange}
             />
-            <IconButton type="button" sx={{ p: '10px' }} aria-label="search"
-                onClick = {handleSearch}
+            <IconButton type="button" sx={{p: '10px'}} aria-label="search"
+                        onClick={handleSearch}
             >
 
-                <SearchIcon />
+                <SearchIcon/>
             </IconButton>
-            <Divider sx={{ height: 32, m: 0.5 }} orientation="vertical" />
-            <IconButton color="primary" sx={{ p: '10px' }} aria-label="directions">
-                <DirectionsIcon />
+            <Divider sx={{height: 32, m: 0.5}} orientation="vertical"/>
+            <IconButton color="primary" sx={{p: '10px'}} aria-label="directions">
+                <DirectionsIcon/>
             </IconButton>
         </Paper>
     );
