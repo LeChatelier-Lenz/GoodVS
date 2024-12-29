@@ -21,7 +21,10 @@ type ServerInterface interface {
 	Search(c *gin.Context)
 	// (GET /platform/login)
 	PlatformLogin(c *gin.Context)
-
+	// (POST /follow)
+	Follow(c *gin.Context)
+	// (POST /unfollow)
+	Unfollow(c *gin.Context)
 }
 
 // ServerInterfaceWrapper converts contexts to parameters.
@@ -90,6 +93,30 @@ func (siw *ServerInterfaceWrapper) PlatformLogin(c *gin.Context) {
 	siw.Handler.PlatformLogin(c)
 }
 
+// Follow operation middleware
+func (siw *ServerInterfaceWrapper) Follow(c *gin.Context) {
+	fmt.Println("Process: follow")
+	for _, middleware := range siw.HandlerMiddlewares {
+		middleware(c)
+		if c.IsAborted() {
+			return
+		}
+	}
+	siw.Handler.Follow(c)
+}
+
+// Unfollow operation middleware
+func (siw *ServerInterfaceWrapper) Unfollow(c *gin.Context) {
+	fmt.Println("Process: unfollow")
+	for _, middleware := range siw.HandlerMiddlewares {
+		middleware(c)
+		if c.IsAborted() {
+			return
+		}
+	}
+	siw.Handler.Unfollow(c)
+}
+
 
 // GinServerOptions provides options for the Gin server.
 type GinServerOptions struct {
@@ -122,6 +149,8 @@ func RegisterHandlersWithOptions(router gin.IRouter, si ServerInterface, options
 	router.POST(options.BaseURL+"/user/register", wrapper.Register)
 	router.POST(options.BaseURL+"/user/login", wrapper.Login)
 	router.GET(options.BaseURL+"/search", wrapper.Search)
-	router.GET(options.BaseURL+"/platform/login",wrapper.PlatformLogin)
+	router.POST(options.BaseURL+"/platform/login",wrapper.PlatformLogin)
+	router.POST(options.BaseURL+ "/follow", wrapper.Follow)
+	router.POST(options.BaseURL+ "/unfollow", wrapper.Unfollow)
 	// 专门用于处理非法路由请求
 }

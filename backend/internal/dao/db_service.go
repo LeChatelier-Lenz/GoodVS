@@ -164,7 +164,7 @@ func (db DBMS) GetUserFollowList(userID int64) (followList []model.Follow, err e
 }
 
 // RemoveFollow remove a follow
-func (db DBMS) removeFollow(productID string, userID int64) (err error) {
+func (db DBMS) RemoveFollow(productID string, userID int64) (err error) {
 	err = db.Where(&model.Follow{
 		ProductId: productID,
 		UserId:    userID,

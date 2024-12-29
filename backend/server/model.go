@@ -218,3 +218,12 @@ type SearchRes struct {
 	Results []ProductByCraw `json:"results"`
 	Msg string `json:"msg"`
 }
+
+type PlatformLoginReq struct {
+	Platform string `json:"platform"`
+}
+
+type FollowReq struct {
+	ProductId string `json:"product_id"`
+	UserId int64 `json:"user_id"`
+}

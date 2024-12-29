@@ -106,19 +106,53 @@ func (i Impl) Search(c *gin.Context) {
 
 // PlatformLogin platform login
 func (i Impl) PlatformLogin(c *gin.Context) {
-	platform := c.Query("platform")
+	var req server.PlatformLoginReq
+	err := BindReq(c, &req)
+	if err != nil {
+		ResponseFail(c, err, http.StatusBadRequest)
+		return
+	}
+	platform := req.Platform
 	if platform == "" {
 		ResponseFail(c, fmt.Errorf("platform is required"), http.StatusBadRequest)
 		return
 	}
+	err = service.PlatformLogin(c, platform)
 	if err != nil {
 		ResponseFail(c, err, http.StatusBadRequest)
 		return
 	}
-	//token, err := dao.DB(c).PlatformLogin(req)
+	ResponseSuccess(c, "login "+platform+" success")
+}
+
+// Follow follow a product
+func (i Impl) Follow(c *gin.Context) {
+	var req server.FollowReq
+	err := BindReq(c, &req)
 	if err != nil {
 		ResponseFail(c, err, http.StatusBadRequest)
 		return
 	}
-	ResponseSuccess(c, token)
+	err = dao.DB(c).AddFollow(req.ProductId, req.UserId)
+	if err != nil {
+		ResponseFail(c, err, http.StatusBadRequest)
+		return
+	}
+	ResponseSuccess(c, "follow success")
+}
+
+// Unfollow unfollow a product
+func (i Impl) Unfollow(c *gin.Context) {
+	var req server.FollowReq
+	err := BindReq(c, &req)
+	if err != nil {
+		ResponseFail(c, err, http.StatusBadRequest)
+		return
+	}
+	err = dao.DB(c).RemoveFollow(req.ProductId, req.UserId)
+	if err != nil {
+		ResponseFail(c, err, http.StatusBadRequest)
+		return
+	}
+	ResponseSuccess(c, "unfollow success")
 }
