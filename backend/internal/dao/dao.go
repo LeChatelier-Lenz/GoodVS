@@ -7,6 +7,7 @@ import (
 	"goodvs/internal/dao/model"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
+	"time"
 )
 
 type DBMS struct {
@@ -59,6 +60,14 @@ func InitDB() {
 		fmt.Println("Error migrating database")
 		fmt.Println(err)
 	}
+
+	// 初始化定时查询服务
+	Interval := 1 * time.Minute
+
+	timerService := NewTimerService(Interval, DBMS{db})
+
+	// 启动定时查询服务
+	timerService.Start()
 
 	if viper.GetString("App.RunLevel") == "debug" {
 		db = db.Debug()

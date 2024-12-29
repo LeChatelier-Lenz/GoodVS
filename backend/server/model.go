@@ -213,6 +213,19 @@ type ProductByCraw struct {
 //	Platform string `json:"platform"`
 //}
 
+type TimelyQueryReq struct {
+	ProductId string `json:"id"`
+	Price float64 `json:"price"`
+	ProductName string `json:"keywords"`
+	Platform string `json:"platform"`
+}
+//
+//type TimelyQueryRes struct {
+//	ProductId string `json:"id"`
+//	Price float64 `json:"price"`
+//	ProductName string `json:"keywords"`
+//}
+
 
 type SearchRes struct {
 	Results []ProductByCraw `json:"results"`

@@ -13,7 +13,7 @@ func init() {
 	cobra.OnInitialize(initConfig)
 
 	// set config file flag
-	// default value is "../manifest/config/config.yaml"
+	// 默认配置文件为config.yaml，在/backend目录下
 	rootCmd.PersistentFlags().StringP("config", "c", "config.yaml", "config file (default is ./config.yaml)")
 	_ = viper.BindPFlag("config", rootCmd.PersistentFlags().Lookup("config"))
 }
@@ -24,7 +24,6 @@ func initConfig() {
 	// set config file
 	viper.SetConfigFile(viper.GetString("config"))
 	fmt.Println("config file:", viper.GetString("config"))
-	//fmt.Println("config file:", viper.ConfigFileUsed())
 
 	// read config file
 	err := viper.ReadInConfig()

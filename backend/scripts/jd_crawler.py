@@ -5,16 +5,6 @@ import jieba
 from DrissionPage import Chromium
 
 
-# def pure_jd_login():
-#     page = Chromium().latest_tab
-#     page.get("https://www.jd.com/")
-#     # 输出原网站的地址
-#     # print(page.title)
-#     if page.ele('.link-login') and not page.ele('.nikename'):
-#         jd_login(page)
-#     return page
-
-
 def jd_login():
     page = Chromium().new_tab()
     page.get("https://www.jd.com/")
@@ -32,6 +22,58 @@ def jd_login():
     f_cookies.write(json.dumps(cookies, ensure_ascii=False))
     f_cookies.close()
     return cookies
+
+
+def update_check():
+    try:
+        f_request = open('./tmp/jd_request.json', 'r', encoding='utf-8')
+        requests = json.load(f_request)
+        f_request.close()
+    except Exception as e:
+        print(e)
+        print('未找到request文件')
+        exit(0)
+    for req in requests:
+        key_string = req['keywords']
+        page = Chromium().new_tab()
+        try:
+            page.get(f"https://search.jd.com/Search?keyword={key_string}&enc=utf-8")
+            ele = page.ele(".J_selectorLine s-category").ele(".sl-key")
+        except Exception as e:
+            # cookies失效，重新登录
+            print('登录状态失效')
+            print(e)
+            try:
+                jd_login()
+                page.get(f"https://search.jd.com/Search?keyword={key_string}&enc=utf-8")
+                ele = page.ele(".J_selectorLine s-category").ele(".sl-key")
+            except Exception as reLoginError:
+                print(reLoginError)
+                print('登录失败')
+                exit(0)
+        links = page.eles('.gl-i-wrap')
+        if not links:
+            print('未找到商品')
+        for link in links[:5]:
+            # print(link.html)
+            id_str = link.attr('id')
+            while id_str == '' or id_str is None:
+                page.actions.scroll(5, 0)
+                id_str = link.attr('id')
+            if id_str is not None and id_str == req['id']:
+                price = link.ele('.p-price').child().text
+                while price == '':
+                    page.actions.scroll(5, 0)
+                    price = link.ele('.p-price').child().text
+                if price.find('¥'):
+                    print(price)
+                    price = price.split('￥')[1]
+                req['price'] = float(price)
+                break
+        page.close()
+    f_request = open('./tmp/jd_request.json', 'w', encoding='utf-8')
+    f_request.write(json.dumps(requests, ensure_ascii=False))
+    f_request.close()
 
 
 def get_JD(keywords):
@@ -83,10 +125,6 @@ def get_JD(keywords):
             page.actions.scroll(5, 0)
             img_url = link.ele('.p-img').child().child().attr('src')
         price = link.ele('.p-price').child().text
-        # if price.find('已补贴'):
-        #     price = price.split('已补贴')[0]
-        # elif price.find("到手价"):
-        #     price = price.split('到手价')[0]
         if price.find('¥'):
             print(price)
             price = price.split('￥')[1]
@@ -159,7 +197,8 @@ if __name__ == '__main__':
     # keywords: 搜索关键字
     choice = sys.argv[1]
     if choice == 'r':
-        input_arr = sys.argv[2:]
+        update_check()
+        exit(0)
     elif choice == 'f':
         input_arr = segment_text(sys.argv[2:])
         print("分词结果:", input_arr)

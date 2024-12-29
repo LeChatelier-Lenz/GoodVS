@@ -10,6 +10,42 @@ def get_taobao(keywords):
     pass
 
 
+def update_check():
+    f_request = open('./tmp/sn_request.json', 'r', encoding='utf-8')
+    requests = json.load(f_request)
+    f_request.close()
+    for req in requests:
+        key_string = req['keywords']
+        page = Chromium().new_tab()
+    # 访问某一页的网页
+        page.get(f'https://search.suning.com/{key_string}/')
+        try:
+            links = page.eles('.product-box ')
+        except Exception as e:
+            print(e)
+            print('爬取失败')
+            page.close()
+            continue
+        # 遍历所有<a>元素
+        for link in links[:5]:
+            id_str = link.parent().parent().attr('id')
+            if id_str is not None and id_str == req['id']:
+                price = link.ele('.def-price').text
+                while price == '':
+                    page.actions.scroll(5, 0)
+                    price = link.ele('.def-price').text
+                if price.find('¥') == -1:
+                    price = float(price.split('到')[0])
+                else:
+                    price = float(price.split('¥')[1].split('到')[0])
+                req['price'] = price
+                break
+        page.close()
+    f_request = open('./tmp/sn_request.json', 'w', encoding='utf-8')
+    f_request.write(json.dumps(requests, ensure_ascii=False))
+    f_request.close()
+
+
 def get_SN(keywords):
     # 创建页面对象
     key_string = " ".join(keywords)
@@ -98,7 +134,8 @@ if __name__ == '__main__':
     choice = sys.argv[1]
     r = []
     if choice == 'r':
-        input_arr = sys.argv[2:]
+        update_check()
+        exit(0)
     elif choice == 'f':
         input_arr = segment_text(sys.argv[2:])
         print("分词结果:", input_arr)

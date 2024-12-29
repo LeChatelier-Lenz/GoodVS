@@ -16,6 +16,7 @@ var rootCmd = &cobra.Command{
 	RunE: func(cmd *cobra.Command, args []string) error {
 		// init db
 		dao.InitDB()
+
 		//// start server
 		fmt.Println("Hello, GoodVS!")
 		//service.SendEmail("3220100886@zju.edu.cn")

@@ -183,17 +183,23 @@ func (db DBMS) GetUserFollowList(userID int64) (productList []server.ProductByCr
 		return nil, fmt.Errorf("you have not follow any product")
 	}
 	for _, follow := range followList {
+		tx := db.Begin()
 		product, err := db.GetProductItemByID(follow.ProductId)
 		if err != nil {
 			logrus.Error("fail to get product item")
+			tx.Rollback()
 			return nil, err
 		}
+		tx.Commit()
 		resp := product.Marshal()
+		tx = db.Begin()
 		resp.Price, err = db.GetLatestProductPrice(follow.ProductId)
 		if err != nil || resp.Price == -1 {
 			logrus.Error("fail to get latest price")
+			tx.Rollback()
 			return nil, err
 		}
+		tx.Commit()
 		productList = append(productList, resp)
 	}
 	return productList, err
@@ -211,6 +217,62 @@ func (db DBMS) RemoveFollow(productID string, userID int64) (err error) {
 	}
 	return err
 }
+
+// GetCheckingList get checking list
+// 获取所有关注商品的信息，用于定时检查
+func (db DBMS) GetCheckingList() (queries []server.TimelyQueryReq, err error) {
+	var followList []model.Follow
+	err = db.Find(&followList).Error
+	if err != nil {
+		logrus.Error("fail to find in table Follow")
+		return nil, err
+	}
+	for _, follow := range followList {
+		tx := db.Begin()
+		product, err := db.GetProductItemByID(follow.ProductId)
+		if err != nil {
+			tx.Rollback()
+			logrus.Error("fail to get product item" + follow.ProductId)
+			//return nil, err
+			continue
+		}
+		price, err := db.GetLatestProductPrice(follow.ProductId)
+		if err != nil {
+			logrus.Error("fail to get latest price")
+			tx.Rollback()
+			return nil, err
+		}
+		tx.Commit()
+		queries = append(queries, server.TimelyQueryReq{
+			ProductId:   follow.ProductId,
+			Price:       price,
+			ProductName: product.Name,
+			Platform:    product.Platform,
+		})
+	}
+	return queries, err
+}
+
+// UpdateProductPrice update product price
+func (db DBMS) UpdateProductPrice(product server.TimelyQueryReq) (err error) {
+	err = db.AddProductPrice(product.ProductId, product.Price)
+	if err != nil {
+		logrus.Error("fail to add product price")
+		return err
+	}
+	return nil
+}
+
+//func (db DBMS) GetPlatformByProductID(productID string) (platform string, err error) {
+//	var product model.Product
+//	err = db.Where(&model.Product{
+//		Id: productID,
+//	}).First(&product).Error
+//	if err != nil {
+//		return "", err
+//	}
+//	return product.Platform, nil
+//}
 
 //// PutProductPriceList get product list
 //func (db DBMS) PutProductPriceList(productPriceList []server.ProductByCraw) (err error) {

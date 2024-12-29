@@ -123,7 +123,7 @@ func (i Impl) PlatformLogin(c *gin.Context) {
 		ResponseFail(c, fmt.Errorf("platform is required"), http.StatusBadRequest)
 		return
 	}
-	err = service.PlatformLogin(c, platform)
+	err = service.PlatformLogin(platform)
 	if err != nil {
 		ResponseFail(c, err, http.StatusBadRequest)
 		return
@@ -181,4 +181,19 @@ func (i Impl) GetFollowList(c *gin.Context) {
 		return
 	}
 	ResponseSuccess(c, followProductList)
+}
+
+// GetProductPriceList get price list by product id
+func (i Impl) GetProductPriceList(c *gin.Context) {
+	productId, ok := c.GetQuery("product_id")
+	if !ok {
+		ResponseFail(c, fmt.Errorf("productId is required"), http.StatusBadRequest)
+		return
+	}
+	err, priceList := dao.DB(c).GetProductPriceList(productId)
+	if err != nil {
+		ResponseFail(c, err, http.StatusBadRequest)
+		return
+	}
+	ResponseSuccess(c, priceList)
 }
