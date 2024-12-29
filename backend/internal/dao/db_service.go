@@ -11,12 +11,13 @@ import (
 
 // AddUser create a new user
 func (db DBMS) AddUser(user server.UserRegisterReq) (token string, err error) {
-	var tmp model.User
+	var tmp []model.User
 	// check if user already exist
-	err = db.Where(&model.User{
+	users := db.Where(&model.User{
+		Name:  user.Name,
 		Email: user.Email,
-	}).First(&tmp).Error
-	if tmp != (model.User{}) || err == nil {
+	}).Find(&tmp)
+	if users.RowsAffected != 0 || users.Error == nil {
 		return "", fmt.Errorf("user already exist")
 	}
 	result := model.User{

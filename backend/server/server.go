@@ -25,6 +25,8 @@ type ServerInterface interface {
 	Follow(c *gin.Context)
 	// (POST /unfollow)
 	Unfollow(c *gin.Context)
+	// (GET /follow)
+	GetFollowList(c *gin.Context)
 }
 
 // ServerInterfaceWrapper converts contexts to parameters.
@@ -118,6 +120,19 @@ func (siw *ServerInterfaceWrapper) Unfollow(c *gin.Context) {
 }
 
 
+// GetFollowList operation middleware
+func (siw *ServerInterfaceWrapper) GetFollowList(c *gin.Context) {
+	fmt.Println("Process: get follow list")
+	for _, middleware := range siw.HandlerMiddlewares {
+		middleware(c)
+		if c.IsAborted() {
+			return
+		}
+	}
+	siw.Handler.GetFollowList(c)
+}
+
+
 // GinServerOptions provides options for the Gin server.
 type GinServerOptions struct {
 	BaseURL      string
@@ -152,5 +167,6 @@ func RegisterHandlersWithOptions(router gin.IRouter, si ServerInterface, options
 	router.POST(options.BaseURL+"/platform/login",wrapper.PlatformLogin)
 	router.POST(options.BaseURL+ "/follow", wrapper.Follow)
 	router.POST(options.BaseURL+ "/unfollow", wrapper.Unfollow)
+	router.GET(options.BaseURL+"/follow", wrapper.GetFollowList)
 	// 专门用于处理非法路由请求
 }

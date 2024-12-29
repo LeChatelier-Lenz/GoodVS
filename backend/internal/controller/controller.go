@@ -8,6 +8,7 @@ import (
 	"goodvs/internal/service"
 	"goodvs/server"
 	"net/http"
+	"strconv"
 )
 
 type Impl struct {
@@ -155,4 +156,24 @@ func (i Impl) Unfollow(c *gin.Context) {
 		return
 	}
 	ResponseSuccess(c, "unfollow success")
+}
+
+// GetFollowList get follow list
+func (i Impl) GetFollowList(c *gin.Context) {
+	userIdStr, ok := c.GetQuery("userId")
+	if !ok {
+		ResponseFail(c, fmt.Errorf("userId is required"), http.StatusBadRequest)
+		return
+	}
+	userId, err := strconv.ParseInt(userIdStr, 10, 64)
+	if err != nil {
+		ResponseFail(c, err, http.StatusBadRequest)
+		return
+	}
+	followList, err := dao.DB(c).GetUserFollowList(userId)
+	if err != nil {
+		ResponseFail(c, err, http.StatusBadRequest)
+		return
+	}
+	ResponseSuccess(c, followList)
 }
