@@ -75,6 +75,8 @@ def get_JD(keywords):
     result = []
     for link in links[:5]:
         # print(link.html)
+        id_str = link.attr('id')
+        url = link.ele('.p-img').child().attr('href')
         img_url = link.ele('.p-img').child().child().attr('src')
         # count = 0
         while img_url == '' or img_url is None:
@@ -90,13 +92,15 @@ def get_JD(keywords):
             price = price.split('￥')[1]
         title = link.ele('.p-name p-name-type-2').child().text
         result.append({
+            'id': id_str,
             'name': key_string,
+            'url': url,
             'img_url': img_url,
             'price': float(price),
             'title': title,
             'platform': '京东',
             'category': category
-            # url
+
             # id
         })
     page.close()

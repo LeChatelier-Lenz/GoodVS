@@ -160,7 +160,7 @@ func (i Impl) Unfollow(c *gin.Context) {
 
 // GetFollowList get follow list
 func (i Impl) GetFollowList(c *gin.Context) {
-	userIdStr, ok := c.GetQuery("userId")
+	userIdStr, ok := c.GetQuery("user_id")
 	if !ok {
 		ResponseFail(c, fmt.Errorf("userId is required"), http.StatusBadRequest)
 		return

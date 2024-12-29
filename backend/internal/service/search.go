@@ -36,6 +36,8 @@ func Search(reqStr string, opt int) (data []server.ProductByCraw, err error) {
 	var category = result[0].Category // 暂时只取第一个商品的category
 	for _, v := range result {
 		r := server.ProductByCraw{
+			Id:       v.Id,
+			Url:      v.Url,
 			Name:     v.Name,
 			ImgUrl:   v.ImgUrl,
 			Price:    v.Price,

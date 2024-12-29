@@ -31,7 +31,9 @@ def get_SN(keywords):
     # 遍历所有<a>元素
     result = []
     for link in links[:5]:
+        id_str = link.parent().parent().attr('id')
         img_url = link.ele('.res-img').ele('.img-block').child().child().attr('src')
+        url = link.ele('.res-img').ele('.img-block').child().attr('href')
         price = link.ele('.def-price').text
         while price == '':
             page.actions.scroll(5, 0)
@@ -42,6 +44,8 @@ def get_SN(keywords):
             price = float(price.split('¥')[1].split('到')[0])
         title = link.ele('.title-selling-point').child().text
         result.append({
+            'id': id_str,
+            'url': url,
             'name': key_string,
             'img_url': img_url,
             'price': price,
