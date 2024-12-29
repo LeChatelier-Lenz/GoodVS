@@ -2,194 +2,12 @@ package dao
 
 import (
 	"fmt"
+	"github.com/sirupsen/logrus"
 	"goodvs/internal/dao/model"
 	"goodvs/server"
 	"strconv"
 	"time"
-
-	"github.com/sirupsen/logrus"
-	"gorm.io/gorm"
-	"gorm.io/gorm/clause"
 )
-
-type JSONBQueryExp struct {
-	column   string
-	keys     []string
-	allIn    bool
-	oneIn    bool
-	notAllIn bool
-	notOneIn bool
-}
-
-func JSONBQuery(column string) *JSONBQueryExp {
-	return &JSONBQueryExp{column: column}
-}
-
-func (jsonbQuery *JSONBQueryExp) AllIn(keys []string) *JSONBQueryExp {
-	jsonbQuery.keys = keys
-	jsonbQuery.allIn = true
-	return jsonbQuery
-}
-
-func (jsonbQuery *JSONBQueryExp) OneIn(keys []string) *JSONBQueryExp {
-	jsonbQuery.keys = keys
-	jsonbQuery.oneIn = true
-	return jsonbQuery
-}
-
-func (jsonbQuery *JSONBQueryExp) NotAllIn(keys []string) *JSONBQueryExp {
-	jsonbQuery.keys = keys
-	jsonbQuery.notAllIn = true
-	return jsonbQuery
-}
-
-func (jsonbQuery *JSONBQueryExp) NotOneIn(keys []string) *JSONBQueryExp {
-	jsonbQuery.keys = keys
-	jsonbQuery.notOneIn = true
-	return jsonbQuery
-}
-
-func (jsonbQuery *JSONBQueryExp) Build(builder clause.Builder) {
-	if stmt, ok := builder.(*gorm.Statement); ok {
-		if jsonbQuery.allIn {
-			builder.WriteString(jsonbQuery.column + " ?& ARRAY[")
-		} else if jsonbQuery.oneIn {
-			builder.WriteString(jsonbQuery.column + " ?| ARRAY[")
-		} else if jsonbQuery.notAllIn {
-			builder.WriteString("NOT " + jsonbQuery.column + " ?& ARRAY[")
-		} else if jsonbQuery.notOneIn {
-			builder.WriteString("NOT " + jsonbQuery.column + " ?| ARRAY[")
-		}
-		for index, key := range jsonbQuery.keys {
-			if index != 0 {
-				builder.WriteString(",")
-			}
-			builder.AddVar(stmt, key)
-		}
-		builder.WriteString("]")
-	}
-}
-
-func (db DBMS) FilterMaterial(params server.Filter, page int, ordered *string, asc bool) (err error, total int, results []model.Material) {
-	filter := db.Model(&model.Material{})
-	if params.MpID != nil {
-		filter = filter.Where(&model.Material{
-			MpID: *params.MpID,
-		})
-	}
-	if params.Pam != nil {
-		filter = filter.Where("materials.pam = ?", *params.Pam)
-		//filter = filter.Joins("JOIN symmetry ON symmetry.id = materials.symmetry_id").Where("symmetry.pam = ?", *params.Pam)
-	}
-	if params.Type != nil {
-		filter = filter.Where("materials.chirai = ?", string(*params.Type))
-		//filter = filter.Joins("JOIN symmetry ON symmetry.id = materials.symmetry_id").Where("symmetry.chirai = ?", string((*params.Type).Chiral))
-	}
-	if params.Symmetry != nil {
-		filter = filter.Where("symmetry_id IN ?", *params.Symmetry)
-	}
-	if params.Elements != nil {
-		if !params.Precisely {
-			var elementsHas []string
-			var elementsFrac []server.Element
-			for _, element := range *params.Elements {
-				if element.Number == -1 {
-					elementsHas = append(elementsHas, element.Name)
-				} else {
-					elementsFrac = append(elementsFrac, element)
-				}
-			}
-			if len(elementsFrac) == 1 {
-				elementsHas = append(elementsHas, elementsFrac[0].Name)
-			}
-			if len(elementsHas) > 0 {
-				filter = filter.Where(JSONBQuery("elements").AllIn(elementsHas))
-			}
-			if len(elementsFrac) > 1 {
-				for index, element := range elementsFrac {
-					element1Name := element.Name
-					element1Number := element.Number
-					element2Name := elementsFrac[(index+1)%len(elementsFrac)].Name
-					element2Number := elementsFrac[(index+1)%len(elementsFrac)].Number
-					filter = filter.Where("(materials.elements->>?)::int * ? = (materials.elements->>?)::int * ?", element1Name, element2Number, element2Name, element1Number)
-				}
-			}
-		} else {
-			for _, element := range *params.Elements {
-				filter = filter.Where("elements->>? = ?", element.Name, element.Number)
-			}
-		}
-	}
-	if params.ElementsExclude != nil {
-		var elements []string
-		for _, element := range *params.ElementsExclude {
-			elements = append(elements, element.Name)
-		}
-		filter = filter.Where(JSONBQuery("elements").NotOneIn(elements))
-	}
-	if ordered != nil {
-		if asc {
-			filter = filter.Order(*ordered + " ASC")
-		} else {
-			filter = filter.Order(*ordered + " DESC")
-		}
-	}
-	err = filter.Offset((page - 1) * 20).Limit(20).Find(&results).Error
-	total = len(results)
-	return err, total, results
-}
-
-func (db DBMS) AddMaterial(material model.Material) (err error) {
-	err = db.Create(&material).Error
-	return err
-}
-
-func (db DBMS) GetMaterialByUUID(uuid string) (err error, material model.Material) {
-	err = db.Where(&model.Material{
-		Uuid: uuid,
-	}).First(&material).Error
-	return err, material
-}
-
-func (db DBMS) GetMaterialByMpID(mpID string) (err error, material model.Material) {
-	err = db.Where(&model.Material{
-		MpID: mpID,
-	}).First(&material).Error
-	return err, material
-}
-
-func (db DBMS) GetSymmetryByID(id int64) (err error, symmetry model.Symmetry) {
-	err = db.Where(&model.Symmetry{
-		Id: symmetry.Id,
-	}).First(&symmetry).Error
-	return err, symmetry
-}
-
-func (db DBMS) PostUpload(uploads []server.PostUploadJSONBody) (err error) {
-	for _, result := range uploads {
-		newMaterial := model.Material{}
-		newMaterial.Unmarshal(&result)
-		newData := model.Datas{}
-		err = db.Model(&model.Datas{}).Where(&model.Datas{
-			MpID: newMaterial.MpID,
-		}).First(&newData).Error
-		if err != nil {
-			logrus.Error("fail to find the compound in table Datas")
-			return
-		}
-		newMaterial.Compoundname = newData.Compoundname
-		newMaterial.SymmetryId = newData.SymmetryId
-		newMaterial.Elements = newData.Elements
-		err = db.AddMaterial(newMaterial)
-		if err != nil {
-			logrus.Error("fail to create in table Material")
-			return
-		}
-	}
-	return
-}
-
-// ---------------
 
 // AddUser create a new user
 func (db DBMS) AddUser(user server.UserRegisterReq) (token string, err error) {
@@ -232,86 +50,171 @@ func (db DBMS) ValidateUser(user server.UserLoginReq) (token string, err error) 
 	return strconv.FormatInt(result.Id, 10), nil
 }
 
-//// AddProduct add a new product into database
-//// step 1: check if product already exist
-//// step 2: create new product
-//// step 3: add price list
-//func (db DBMS) AddProduct(products []server.ProductByCraw) (err error) {
-//	var product model.Product
-//	result = db.Where(&model.Product{
-//		Name: products[0].Name,
-//	}).Find(&product)
-//	if result.Error == nil {
-//		fmt.Println("product already exist")
-//	} else {
-//		// create new product
-//	}
-//	return err
-//}
-
 // AddProductItem purely add a new product item into database
-func (db DBMS) AddProductItem(product server.ProductByCraw) (productId int64, err error) {
+func (db DBMS) AddProductItem(products server.ProductByCraw) (productId string, err error) {
+	var product model.Product
 	// check if product already exist
-	var tmp model.Product
-	err = db.Where(&model.Product{
-		Name: product.Name,
-	}).First(&tmp).Error
-	if err == nil {
+	result := db.Where(&model.Product{
+		Name: products.Name,
+		Id:   products.Id,
+	}).Find(&product)
+	if result.Error == nil {
 		// product already exist
-		logrus.Info("product already exist")
-		return tmp.Id, nil
+		return productId, nil
 	}
-	// create new product
-	var newProductItem model.Product
-	// 从server.ProductByCraw转换为model.Product
-	//newProductItem.Unmarshal(&product)
-	err = db.Create(&newProductItem).Error
-	return newProductItem.Id, err
-}
-
-// GetProductItemById get product by id
-func (db DBMS) GetProductItemById(id int64) (err error, product model.Product) {
-	err = db.Where(&model.Product{
-		Id: id,
-	}).First(&product).Error
-	return err, product
-}
-
-// PutProductPriceList get product list
-func (db DBMS) PutProductPriceList(productPriceList []server.ProductByCraw) (err error) {
-	productID, err := db.AddProductItem(productPriceList[0])
+	newProduct := model.Product{
+		Id:       products.Id,
+		Name:     products.Name,
+		Url:      products.Url,
+		ImgUrl:   products.ImgUrl,
+		Detail:   products.Title,
+		Category: products.Category,
+		Platform: products.Platform,
+	}
+	err = db.Create(&newProduct).Error
 	if err != nil {
-		logrus.Error("fail to add product item")
-		return err
+		/// logrus.Error("fail to create in table Product")
+		return productId, err
 	}
-	for _, product := range productPriceList {
-		newProductPrice := model.ProductPrice{
-			ProductId: productID,
-			Price:     product.Price,
-			Platform:  product.Platform,
-			Detail:    product.Title,
-			//Url:       product.ImgUrl,
-			CreatedAt: time.Now(),
-		}
-		err = db.Create(&newProductPrice).Error
-		if err != nil {
-			logrus.Error("fail to create in table ProductPrice")
-			return err
-		}
+	return newProduct.Id, nil
+}
+
+// AddProductPrice add a new price into database
+func (db DBMS) AddProductPrice(productID string, price float64) (err error) {
+	newProductPrice := model.ProductPrice{
+		ProductId: productID,
+		Price:     price,
+		CreatedAt: time.Now(),
+	}
+	err = db.Create(&newProductPrice).Error
+	if err != nil {
+		//logrus.Error("fail to create in table ProductPrice")
+		return err
 	}
 	return nil
 }
 
-// GetPriceListByProductID get price list by product id
-func (db DBMS) GetPriceListByProductID(productID int64) (err error, priceList []model.ProductPrice) {
+// GetProductItem get product item by name and id
+func (db DBMS) GetProductItem(name string, id string) (product model.Product, err error) {
+	err = db.Where(&model.Product{
+		Name: name,
+		Id:   id,
+	}).First(&product).Error
+	return product, err
+}
+
+// GetProductPriceList get price list by product id
+func (db DBMS) GetProductPriceList(productID string) (err error, priceList []model.ProductPrice) {
 	err = db.Where(&model.Product{
 		Id: productID,
 	}).First(&model.Product{}).Error
 	if err != nil {
+		logrus.Error("fail to find product")
 		return err, nil
 	}
-	err = db.Where(&model.ProductPrice{
+	// get price list，根据商品ID获取价格列表，按照时间排序
+	err = db.Order("created_at").Where(&model.ProductPrice{
 		ProductId: productID,
-	}).Find(&priceList).Error
+	}).Find(&priceList, "created_at").Error
+	if len(priceList) == 0 {
+		return fmt.Errorf("no price list"), nil
+	}
 	return err, priceList
 }
+
+// AddFollow add a new follow
+func (db DBMS) AddFollow(productID string, userID int64) (err error) {
+	// check if already follow
+	var follow model.Follow
+	result := db.Where(&model.Follow{
+		ProductId: productID,
+		UserId:    userID,
+	}).Find(&follow)
+	if result.Error == nil {
+		// already follow
+		return fmt.Errorf("already follow")
+	}
+	newFollow := model.Follow{
+		ProductId: productID,
+		UserId:    userID,
+	}
+	err = db.Create(&newFollow).Error
+	if err != nil {
+		logrus.Error("fail to create in table Follow")
+		return err
+	}
+	return nil
+}
+
+// GetUserFollowList get user follow list
+func (db DBMS) GetUserFollowList(userID int64) (followList []model.Follow, err error) {
+	userSearch := db.Where(&model.User{
+		Id: userID,
+	}).Find(&model.User{})
+	if userSearch.RowsAffected == 0 {
+		return nil, fmt.Errorf("user not exist")
+	}
+	err = db.Where(&model.Follow{
+		UserId: userID,
+	}).Find(&followList).Error
+	if len(followList) == 0 {
+		return nil, fmt.Errorf("you have not follow any product")
+	}
+	return followList, err
+}
+
+// RemoveFollow remove a follow
+func (db DBMS) removeFollow(productID string, userID int64) (err error) {
+	err = db.Where(&model.Follow{
+		ProductId: productID,
+		UserId:    userID,
+	}).Delete(&model.Follow{}).Error
+	if err != nil {
+		logrus.Error("fail to delete in table Follow")
+		return err
+	}
+	return err
+}
+
+//// PutProductPriceList get product list
+//func (db DBMS) PutProductPriceList(productPriceList []server.ProductByCraw) (err error) {
+//	// 先添加商品项条目
+//	productID, err := db.AddProductItem(productPriceList)
+//	if err != nil {
+//		logrus.Error("fail to add product item")
+//		return err
+//	}
+//	if productID == "" {
+//		return fmt.Errorf("
+//	}
+//	// 无论是否已经存在，都会获得商品ID，接下来添加价格列表
+//	for _, product := range productPriceList {
+//		newProductPrice := model.ProductPrice{
+//			ProductId: productID,
+//			Price:     product.Price,
+//			//Url:       product.ImgUrl,
+//			CreatedAt: time.Now(),
+//		}
+//		err = db.Create(&newProductPrice).Error
+//		if err != nil {
+//			logrus.Error("fail to create in table ProductPrice")
+//			return err
+//		}
+//	}
+//	return nil
+//}
+
+//// GetPriceListByProductID get price list by product id
+//func (db DBMS) GetPriceListByProductID(productID int64) (err error, priceList []model.ProductPrice) {
+//	err = db.Where(&model.Product{
+//		Id: productID,
+//	}).First(&model.Product{}).Error
+//	if err != nil {
+//		return err, nil
+//	}
+//	// get price list，根据商品ID获取价格列表，按照时间排序
+//	err = db.Where(&model.ProductPrice{
+//		ProductId: productID,
+//	}).Find(&priceList).Error
+//	return err, priceList
+//}

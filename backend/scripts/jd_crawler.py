@@ -96,6 +96,8 @@ def get_JD(keywords):
             'title': title,
             'platform': '京东',
             'category': category
+            # url
+            # id
         })
     page.close()
     return result

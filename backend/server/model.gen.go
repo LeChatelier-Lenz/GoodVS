@@ -192,12 +192,15 @@ type SearchReq struct {
 }
 
 type ProductByCraw struct {
+	Id       string  `json:"id"`
 	Name     string  `json:"name"`
+	Url 	 string  `json:"url"`
 	ImgUrl   string  `json:"img_url"`
 	Price    float64 `json:"price"`
 	Title    string  `json:"title"`
 	Category string  `json:"category"`
 	Platform string  `json:"platform"`
+
 }
 
 
@@ -213,4 +216,5 @@ type ProductByCraw struct {
 
 type SearchRes struct {
 	Results []ProductByCraw `json:"results"`
+	Msg string `json:"msg"`
 }
