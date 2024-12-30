@@ -5,6 +5,7 @@ import (
 	"github.com/spf13/cobra"
 	"goodvs/internal/controller"
 	"goodvs/internal/dao"
+	"goodvs/internal/service"
 )
 
 // rootCmd represents the base command when called without any subcommands
@@ -20,6 +21,7 @@ var rootCmd = &cobra.Command{
 		//// start server
 		fmt.Println("Hello, GoodVS!")
 		//service.SendEmail("3220100886@zju.edu.cn")
+		service.InitES()
 		return controller.StartServer()
 
 		//return nil

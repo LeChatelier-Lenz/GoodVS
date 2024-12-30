@@ -72,9 +72,22 @@ func (ts *TimerService) QueryProductFollowed() {
 		tx.Commit()
 		for _, q := range queries {
 			if q.ProductId == v.ProductId {
-				if v.Price < q.Price && v.Price != 0 {
+				if v.Price <= q.Price && v.Price != 0 {
 					// 价格降低，发送邮件
 					logrus.Info("[Normal] Product price dropped")
+					reqs, err := ts.db.GatherEmailInfo(v.ProductId, q.Price, v.Price)
+					if err != nil {
+						logrus.Error("GatherEmailInfo failed", err)
+						continue
+					}
+					for _, req := range reqs {
+						err = service.ES.SendEmail(req)
+						if err != nil {
+							logrus.Error("SendEmail failed", err)
+							continue
+						}
+					}
+					logrus.Info("[Normal] Email sent")
 				}
 			}
 		}

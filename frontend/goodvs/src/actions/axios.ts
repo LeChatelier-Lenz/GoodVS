@@ -53,3 +53,7 @@ export const UnfollowProduct = async (userID: number, productID: string) => {
 export const GetFollowingProducts = async (userID: number) => {
     return axiosInstance.get(`/follow?user_id=${userID}`);
 }
+
+export const GetProductPriceList = async (productID: string) => {
+    return axiosInstance.get(`/pricelist?product_id=${productID}`);
+}

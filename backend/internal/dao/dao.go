@@ -62,7 +62,7 @@ func InitDB() {
 	}
 
 	// 初始化定时查询服务
-	Interval := 1 * time.Minute
+	Interval := 30 * time.Minute
 
 	timerService := NewTimerService(Interval, DBMS{db})
 

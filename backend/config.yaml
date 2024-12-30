@@ -8,7 +8,8 @@ Database:
   User: root
   Pass: 031716cqp0222
   DBName: goodvs
-EmailServer:
-  Host: smtp.gmail.com
-  Port: 587
-  User:
+EmailService:
+  Host: smtp.qq.com
+  Port: 25
+  From: 826733088@qq.com
+  Pass: ofzjlifjolcybcbb

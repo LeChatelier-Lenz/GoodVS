@@ -17,7 +17,7 @@ func (db DBMS) AddUser(user server.UserRegisterReq) (token string, err error) {
 		Name:  user.Name,
 		Email: user.Email,
 	}).Find(&tmp)
-	if users.RowsAffected != 0 || users.Error == nil {
+	if users.RowsAffected != 0 && users.Error == nil {
 		return "", fmt.Errorf("user already exist")
 	}
 	result := model.User{
@@ -49,6 +49,14 @@ func (db DBMS) ValidateUser(user server.UserLoginReq) (token string, err error) 
 		return "", thisErr
 	}
 	return strconv.FormatInt(result.Id, 10), nil
+}
+
+// GetUserByID get user by id
+func (db DBMS) GetUserByID(userID int64) (user model.User, err error) {
+	err = db.Where(&model.User{
+		Id: userID,
+	}).First(&user).Error
+	return user, err
 }
 
 // AddProductItem purely add a new product item into database
@@ -261,6 +269,39 @@ func (db DBMS) UpdateProductPrice(product server.TimelyQueryReq) (err error) {
 		return err
 	}
 	return nil
+}
+
+func (db DBMS) GatherEmailInfo(productID string, oldPrice float64, newPrice float64) (reqs []server.EmailReq, err error) {
+	product, err := db.GetProductItemByID(productID)
+	if err != nil {
+		logrus.Error("fail to get product item")
+		return nil, err
+	}
+	var followList []model.Follow
+	result := db.Where(&model.Follow{
+		ProductId: productID,
+	}).Find(&followList)
+	if result.Error != nil || result.RowsAffected == 0 {
+		return nil, fmt.Errorf("no follower")
+	}
+	for _, follow := range followList {
+		// get user info
+		userId := follow.UserId
+		user, err := db.GetUserByID(userId)
+		if err != nil {
+			logrus.Error("fail to get user")
+			return nil, err
+		}
+		reqs = append(reqs, server.EmailReq{
+			Url:         product.Url,
+			ImageUrl:    product.ImgUrl,
+			ProductName: product.Name,
+			OldPrice:    oldPrice,
+			NewPrice:    newPrice,
+			Target:      user.Email,
+		})
+	}
+	return reqs, nil
 }
 
 //func (db DBMS) GetPlatformByProductID(productID string) (platform string, err error) {

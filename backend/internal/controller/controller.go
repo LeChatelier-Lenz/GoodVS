@@ -183,8 +183,8 @@ func (i Impl) GetFollowList(c *gin.Context) {
 	ResponseSuccess(c, followProductList)
 }
 
-// GetProductPriceList get price list by product id
-func (i Impl) GetProductPriceList(c *gin.Context) {
+// GetPriceList get price list by product id
+func (i Impl) GetPriceList(c *gin.Context) {
 	productId, ok := c.GetQuery("product_id")
 	if !ok {
 		ResponseFail(c, fmt.Errorf("productId is required"), http.StatusBadRequest)

@@ -240,3 +240,12 @@ type FollowReq struct {
 	ProductId string `json:"product_id"`
 	UserId int64 `json:"user_id"`
 }
+
+type EmailReq struct {
+	Url string `json:"url"`
+	ImageUrl string `json:"image_url"`
+	ProductName string `json:"product_name"`
+	Target string `json:"target"`
+	NewPrice float64 `json:"new_price"`
+	OldPrice float64 `json:"old_price"`
+}
